@@ -321,6 +321,52 @@ html:not(.dark) .toggle-thumb{background:#555}
 
 <script>
 let files=[], dragSrcIdx=null;
+
+function stampComplete(){
+  const pb=document.getElementById('pb');
+  // プログレスバーをフラッシュ
+  pb.style.transition='background .15s';
+  const colors=['#0D9488','#14B8A6','#2a7d46','#0D9488'];
+  let ci=0;
+  const flash=setInterval(()=>{
+    pb.style.background=colors[ci%colors.length];
+    ci++;
+    if(ci>=colors.length*2){
+      clearInterval(flash);
+      pb.style.background='var(--pb-fill)';
+      pb.style.transition='width .3s';
+    }
+  },80);
+
+  // 小さいパーティクルバースト（プログレスバーの右端から）
+  const rect=pb.parentElement.getBoundingClientRect();
+  burst(rect.right-4, rect.top+rect.height/2);
+}
+
+function burst(x,y){
+  const N=18, colors=['#0D9488','#14B8A6','#2a7d46','#BF3528','#F5A623','#FFFFFF'];
+  for(let i=0;i<N;i++){
+    const el=document.createElement('div');
+    const size=Math.random()*6+3;
+    const angle=(Math.PI*2*i/N)+(Math.random()-.5)*.5;
+    const speed=Math.random()*90+40;
+    const vx=Math.cos(angle)*speed, vy=Math.sin(angle)*speed;
+    el.style.cssText=`position:fixed;left:${x}px;top:${y}px;width:${size}px;height:${size}px;border-radius:${Math.random()>.5?'50%':'2px'};background:${colors[Math.floor(Math.random()*colors.length)]};pointer-events:none;z-index:9999;transform:translate(-50%,-50%)`;
+    document.body.appendChild(el);
+    let px=0,py=0,op=1,t=0;
+    const tick=()=>{
+      t+=16;
+      px+=vx*0.016;
+      py+=vy*0.016+0.5*(t*0.016);
+      op=Math.max(0,1-t/600);
+      el.style.transform=`translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+      el.style.opacity=op;
+      if(op>0)requestAnimationFrame(tick);
+      else el.remove();
+    };
+    requestAnimationFrame(tick);
+  }
+}
 function clearInsertMarkers(){document.querySelectorAll('.file-row').forEach(r=>{r.classList.remove('drag-insert-before','drag-insert-after');delete r.dataset.insertBefore;});}
 const SK='koc2_settings';
 
@@ -682,6 +728,7 @@ async function processAll(){
   }
   document.getElementById('pt').textContent=`完了 — ${done} ファイル処理しました`;
   btn.disabled=false;btn.textContent='スタンプを付与する';
+  stampComplete();
 }
 
 /* ── ZIP出力 ── */
