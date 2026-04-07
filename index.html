@@ -210,6 +210,9 @@ html:not(.dark) .toggle-thumb{background:#555}
         <label class="chk"><input type="checkbox" id="stamp-bg" onchange="save()"> 白背景</label>
       </div>
       <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="stamp-vertical" onchange="save()"> 縦書きスタンプ</label>
+      </div>
+      <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="page-num" onchange="save()"> ページ番号付与</label>
       </div>
     </div>
@@ -301,6 +304,7 @@ html:not(.dark) .toggle-thumb{background:#555}
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">再付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">JPG・PNG</td><td style="padding:5px 0;color:var(--text);line-height:1.6">画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">白背景</td><td style="padding:5px 0;color:var(--text);line-height:1.6">スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">縦書きスタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">縦書き文書用にスタンプテキストを縦組みで描画します。数字・英字は自動的に横向きに回転されます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ページ番号付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">枝番グループを結合</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">メタデータ削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
@@ -325,7 +329,7 @@ function save(){
       startNum:v('start-num'),numStyle:v('num-style'),separator:v('separator'),
       stampSize:v('stamp-size'),stampColor:v('stamp-color'),
       marginR:v('margin-r'),marginT:v('margin-t'),
-      stampBg:c('stamp-bg'),delMeta:c('del-meta'),
+      stampBg:c('stamp-bg'),stampVertical:c('stamp-vertical'),delMeta:c('del-meta'),
       pageNum:c('page-num'),mergeEda:c('merge-eda'),
     }));
   }catch(e){}
@@ -340,7 +344,7 @@ function loadSettings(){
     set('start-num',s.startNum);set('num-style',s.numStyle);set('separator',s.separator);
     set('stamp-size',s.stampSize);set('stamp-color',s.stampColor);
     set('margin-r',s.marginR);set('margin-t',s.marginT);
-    chk('stamp-bg',s.stampBg);chk('del-meta',s.delMeta);
+    chk('stamp-bg',s.stampBg);chk('stamp-vertical',s.stampVertical);chk('del-meta',s.delMeta);
     chk('page-num',s.pageNum);chk('merge-eda',s.mergeEda);
     onSymSel();
   }catch(e){}
@@ -541,16 +545,65 @@ function makeStampPng(text){
   const fs=parseInt(v('stamp-size'))||14;
   const color=v('stamp-color')||'#BF3528';
   const bg=c('stamp-bg');
+  const vertical=c('stamp-vertical');
   const pad=bg?5:0,DPR=4;
   const cv=document.createElement('canvas');
   const ctx=cv.getContext('2d');
+  const fontStr=`500 ${fs}px system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif`;
+
+  if(vertical){
+    // 縦書き：連続する数字/英字をひとまとめにしてトークン化
+    const tokens=[];
+    let ti=0,chars=Array.from(text);
+    while(ti<chars.length){
+      if(/[0-9A-Za-z]/.test(chars[ti])){
+        let g='';
+        while(ti<chars.length&&/[0-9A-Za-z]/.test(chars[ti]))g+=chars[ti++];
+        tokens.push({type:'ascii',text:g});
+      }else{
+        tokens.push({type:'char',text:chars[ti++]});
+      }
+    }
+    const charH=fs+3;
+    const W=fs+pad*2+6;
+    const H=charH*tokens.length+pad*2+4;
+    cv.width=W*DPR;cv.height=H*DPR;
+    ctx.scale(DPR,DPR);
+    if(bg){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);}
+    ctx.fillStyle=color;
+    const cx=pad+fs/2+3;
+    tokens.forEach((tok,i)=>{
+      const cellTopY=pad+2+i*charH;
+      const cellMidY=cellTopY+charH/2;
+      ctx.font=fontStr;
+      if(tok.type==='ascii'){
+        // 回転なし：縦に並べるだけ
+        const tw=ctx.measureText(tok.text).width;
+        ctx.save();
+        ctx.translate(cx,cellMidY);
+        // 幅がセル幅を超えるならスケールダウン
+        if(tw>W-pad*2-4)ctx.scale((W-pad*2-4)/tw,1);
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(tok.text,0,0);
+        ctx.restore();
+      }else{
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(tok.text,cx,cellMidY);
+      }
+    });
+    const d=cv.toDataURL('image/png'),b=atob(d.split(',')[1]),u=new Uint8Array(b.length);
+    for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+    return{bytes:u,w:W,h:H};
+  }
+
+  // 横書き（従来）
   ctx.font=`500 ${DPR*fs}px system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif`;
   const W=Math.ceil(ctx.measureText(text).width/DPR)+pad*2+4;
   const H=fs+pad*2+4;
   cv.width=W*DPR;cv.height=H*DPR;
   ctx.scale(DPR,DPR);
   if(bg){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);}
-  ctx.font=`500 ${fs}px system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif`;
+  ctx.font=fontStr;
   ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='top';
   ctx.fillText(text,pad,pad+2);
   const d=cv.toDataURL('image/png'),b=atob(d.split(',')[1]),u=new Uint8Array(b.length);
