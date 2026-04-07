@@ -483,11 +483,11 @@ function refreshList(){
     const stamp=stamps[i],nn=outName(item,stamp);
     const isEP=!item.isEda&&raw[i].eda>0;
     let right='';
-    if(item.status==='pending')right=`<span class="sw">待機中</span><button class="rm" onclick="removeFile(${i})">×</button>`;
-    else if(item.status==='img')right=`<span class="si">画像→PDF</span><button class="rm" onclick="removeFile(${i})">×</button>`;
+    if(item.status==='pending')right=`<span class="sw">待機中</span>`;
+    else if(item.status==='img')right=`<span class="si">画像→PDF</span>`;
     else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
     else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
-    else right=`<span class="se">エラー</span><button class="rm" onclick="removeFile(${i})">×</button>`;
+    else right=`<span class="se">エラー</span>`;
     const edaStartInput=isEP?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
@@ -501,7 +501,8 @@ function refreshList(){
       ${edaStartInput}
       <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})"${i===0?' disabled':''}>枝</button>
       <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
-      <div class="fr">${right}</div>`;
+      <div class="fr">${right}</div>
+      <button class="rm" onclick="removeFile(${i})" title="削除" style="flex-shrink:0">×</button>`;
     el.addEventListener('dragstart',e=>{dragSrcIdx=i;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
     el.addEventListener('dragend',()=>{el.classList.remove('dragging');clearInsertMarkers();});
     el.addEventListener('dragover',e=>{
