@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvidenStamp ✦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#07070f;
+  --surface:rgba(255,255,255,0.04);
+  --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-glow:rgba(42,95,216,0.5);
+  --blue:#2A5FD8;
+  --blue-dark:#1A3FA0;
+  --blue-glow:rgba(42,95,216,0.35);
+  --silver:#B8BDC8;
+  --silver-light:#D8DCE8;
+  --text:#EDE8DF;
+  --text-dim:rgba(237,232,223,0.45);
+  --text-muted:rgba(237,232,223,0.25);
+  --done:#2ECC71;
+  --done-glow:rgba(46,204,113,0.3);
+  --bg-grad1:rgba(42,95,216,0.12);
+  --bg-grad2:rgba(184,189,200,0.08);
+  --bg-grad3:rgba(30,20,60,0.6);
+  --modal-bg:#0e0e1a;
+  --sel-opt:#1a1a2e;
+  --transition-speed:.35s;
+}
+
+html.light{
+  --bg:#faf8f3;
+  --surface:rgba(255,255,255,0.75);
+  --surface2:rgba(255,255,255,0.92);
+  --border:rgba(0,0,0,0.09);
+  --border-glow:rgba(42,95,216,0.3);
+  --blue:#2A5FD8;
+  --blue-dark:#1A3FA0;
+  --blue-glow:rgba(42,95,216,0.2);
+  --silver:#8890A8;
+  --silver-light:#B8BDC8;
+  --text:#1a1014;
+  --text-dim:rgba(26,16,20,0.55);
+  --text-muted:rgba(26,16,20,0.3);
+  --done:#1a9450;
+  --done-glow:rgba(26,148,80,0.2);
+  --bg-grad1:rgba(42,95,216,0.06);
+  --bg-grad2:rgba(184,189,200,0.05);
+  --bg-grad3:rgba(250,240,230,0.0);
+  --modal-bg:#ffffff;
+  --sel-opt:#ffffff;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:'DM Mono','Hiragino Kaku Gothic ProN','Yu Gothic',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:40px 20px 80px;
+  overflow-x:hidden;
+  position:relative;
+  transition:background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+html.light body::before{opacity:0.015}
+html.light body::after{
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 5%, var(--bg-grad1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 85%, var(--bg-grad2) 0%, transparent 60%);
+}
+
+/* ─── パーティクルキャンバス ─── */
+#sparkle-canvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ─── ノイズオーバーレイ ─── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.025;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* ─── グロウグラデ背景 ─── */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, var(--bg-grad1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 80%, var(--bg-grad2) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, var(--bg-grad3) 0%, transparent 100%);
+  pointer-events:none;
+  z-index:1;
+  transition:background var(--transition-speed) ease;
+}
+
+.wrap{
+  max-width:800px;
+  margin:0 auto;
+  position:relative;
+  z-index:2;
+}
+
+/* ─── ヘッダー ─── */
+.header{
+  margin-bottom:32px;
+  animation:fadeSlideDown .7s cubic-bezier(.16,1,.3,1) both;
+}
+
+.title-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:6px;
+}
+
+h1{
+  font-family:'Noto Serif JP',serif;
+  font-weight:900;
+  font-size:28px;
+  background:linear-gradient(135deg, #e0e4f0 0%, #a0b0d8 20%, #2A5FD8 50%, #b8c4e0 80%, #f0f2f8 100%);
+  background-size:300% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:shimmerText 4s linear infinite;
+  letter-spacing:-.02em;
+  line-height:1.1;
+}
+
+@keyframes shimmerText{
+  0%{background-position:300% center}
+  100%{background-position:0% center}
+}
+
+.crown{
+  font-size:22px;
+  animation:floatCrown 3s ease-in-out infinite;
+  display:inline-block;
+  filter:drop-shadow(0 0 8px var(--silver));
+}
+
+@keyframes floatCrown{
+  0%,100%{transform:translateY(0) rotate(-5deg)}
+  50%{transform:translateY(-4px) rotate(5deg)}
+}
+
+.help-btn{
+  width:24px;height:24px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.15);
+  background:var(--surface);
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text-dim);
+  font-family:inherit;
+  flex-shrink:0;
+  line-height:1;
+  transition:all .2s;
+  backdrop-filter:blur(10px);
+}
+.help-btn:hover{
+  border-color:var(--silver);
+  color:var(--silver);
+  box-shadow:0 0 12px rgba(184,189,200,0.3);
+}
+
+.sub{
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:.02em;
+  font-family:'DM Mono',monospace;
+}
+
+/* ─── パネル ─── */
+.panel{
+  background:var(--surface);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px 22px;
+  margin-bottom:12px;
+  position:relative;
+  overflow:hidden;
+  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) both;
+  transition:border-color .3s, box-shadow .3s, background var(--transition-speed) ease;
+}
+.panel:hover{
+  border-color:rgba(255,255,255,0.13);
+  box-shadow:0 0 40px rgba(42,95,216,0.06);
+}
+html.light .panel:hover{
+  border-color:rgba(0,0,0,0.14);
+  box-shadow:0 4px 24px rgba(42,95,216,0.07), 0 1px 4px rgba(0,0,0,0.06);
+}
+.panel::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+}
+html.light .panel::before{
+  background:linear-gradient(90deg, transparent, rgba(42,95,216,0.15), transparent);
+}
+
+.panel:nth-child(2){animation-delay:.05s}
+.panel:nth-child(3){animation-delay:.1s}
+
+@keyframes fadeSlideUp{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes fadeSlideDown{
+  from{opacity:0;transform:translateY(-16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.ptitle{
+  font-size:9px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  margin-bottom:14px;
+  font-family:'DM Mono',monospace;
+}
+
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:6px}
+.fl{font-size:10px;color:var(--text-dim);letter-spacing:.05em}
+
+/* ─── インプット系 ─── */
+.num-grp{
+  display:flex;align-items:center;
+  background:rgba(255,255,255,0.05);
+  border-radius:8px;padding:2px 4px;
+  border:1px solid var(--border);
+  transition:border-color .2s, box-shadow .2s;
+}
+.num-grp:focus-within{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px var(--blue-glow);
+}
+.num-grp button{
+  background:none;border:none;cursor:pointer;
+  font-size:17px;line-height:1;padding:2px 6px;
+  color:var(--text-dim);font-family:inherit;
+  transition:color .15s;
+}
+.num-grp button:hover{color:var(--silver)}
+.num-grp input{
+  width:40px;text-align:center;background:none;border:none;outline:none;
+  font-size:13px;font-weight:500;font-family:'DM Mono',monospace;color:var(--text);
+}
+
+select{
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:8px;padding:7px 10px;
+  font-size:12px;color:var(--text);cursor:pointer;outline:none;
+  font-family:'DM Mono',monospace;
+  transition:border-color .2s, box-shadow .2s;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(237,232,223,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  padding-right:28px;
+}
+select:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px var(--blue-glow);
+}
+select option{background:#1a1a2e;color:var(--text)}
+html.light select option{background:#ffffff;color:#1a1014}
+
+.sym-custom{
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:8px;padding:7px 10px;
+  font-size:13px;font-family:'DM Mono',monospace;outline:none;
+  width:85px;color:var(--text);
+  transition:border-color .2s, box-shadow .2s;
+}
+.sym-custom:focus{
+  border-color:var(--silver);
+  box-shadow:0 0 0 3px rgba(184,189,200,0.2);
+}
+
+.divider{
+  border:none;border-top:1px solid var(--border);margin:16px 0;
+}
+
+input[type=number].sm{
+  width:56px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:8px;padding:6px 8px;
+  font-size:13px;font-family:'DM Mono',monospace;outline:none;
+  color:var(--text);text-align:center;
+  transition:border-color .2s, box-shadow .2s;
+}
+input[type=number].sm:focus{
+  border-color:var(--silver);
+  box-shadow:0 0 0 3px rgba(184,189,200,0.2);
+}
+
+input[type=color]{
+  width:36px;height:32px;
+  border:1px solid var(--border);border-radius:8px;
+  cursor:pointer;padding:3px;background:rgba(255,255,255,0.05);flex-shrink:0;
+}
+
+.chk{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text-dim);cursor:pointer;
+  padding-bottom:4px;white-space:nowrap;
+  font-family:'DM Mono',monospace;
+  transition:color .2s;
+}
+.chk:hover{color:var(--text)}
+.chk input{
+  width:15px;height:15px;cursor:pointer;
+  accent-color:var(--blue);flex-shrink:0;
+}
+
+/* ─── ドロップゾーン ─── */
+#dropzone{
+  border:1.5px dashed rgba(255,255,255,0.15);
+  border-radius:16px;
+  padding:42px 24px;
+  text-align:center;
+  cursor:pointer;
+  margin-bottom:12px;
+  transition:all .3s;
+  background:var(--surface);
+  backdrop-filter:blur(20px);
+  position:relative;
+  overflow:hidden;
+  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .15s both;
+}
+#dropzone::before{
+  content:'';
+  position:absolute;
+  inset:-50%;
+  background:conic-gradient(
+    from var(--angle,0deg),
+    transparent 0deg,
+    var(--blue) 60deg,
+    transparent 120deg,
+    transparent 240deg,
+    var(--silver) 300deg,
+    transparent 360deg
+  );
+  opacity:0;
+  transition:opacity .4s;
+  animation:spinGlow 4s linear infinite;
+  border-radius:50%;
+  z-index:-1;
+}
+@property --angle{
+  syntax:'<angle>';
+  initial-value:0deg;
+  inherits:false;
+}
+@keyframes spinGlow{
+  to{--angle:360deg}
+}
+#dropzone:hover::before,#dropzone.over::before{opacity:.15}
+#dropzone:hover,#dropzone.over{
+  border-color:var(--blue);
+  background:rgba(42,95,216,0.05);
+  box-shadow:0 0 40px rgba(42,95,216,0.15), inset 0 0 40px rgba(42,95,216,0.04);
+  transform:translateY(-2px);
+}
+
+.dz-icon{
+  font-size:36px;
+  margin-bottom:10px;
+  display:block;
+  animation:floatIcon 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 12px var(--blue-glow));
+}
+@keyframes floatIcon{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+.dz-t{
+  font-size:14px;font-weight:500;
+  margin-bottom:5px;
+  color:var(--text);
+  font-family:'Noto Serif JP',serif;
+}
+.dz-s{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace}
+
+/* ─── ファイルリストコンテナ ─── */
+#flc{display:none;margin-bottom:12px}
+.flc-top{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.fh{
+  font-size:10px;color:var(--text-muted);
+  font-family:'DM Mono',monospace;letter-spacing:.05em;
+}
+.fc{
+  font-size:12px;color:var(--text-dim);
+  font-family:'DM Mono',monospace;
+}
+.fa{
+  font-size:11px;color:var(--text-muted);
+  background:none;border:none;cursor:pointer;
+  font-family:'DM Mono',monospace;
+  transition:color .2s;
+  padding:3px 8px;
+  border-radius:5px;
+}
+.fa:hover{color:var(--blue);background:rgba(42,95,216,0.1)}
+
+#fl{display:flex;flex-direction:column;gap:6px}
+
+/* ─── ファイル行 ─── */
+.file-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--border);
+  border-radius:12px;padding:10px 13px;
+  transition:all .2s, background var(--transition-speed) ease;
+  user-select:none;
+  animation:rowEnter .35s cubic-bezier(.16,1,.3,1) both;
+  position:relative;
+  overflow:hidden;
+}
+html.light .file-row:hover{
+  background:var(--surface2);
+  border-color:rgba(0,0,0,0.13);
+  box-shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+.file-row::before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:3px;
+  background:linear-gradient(180deg,var(--blue),var(--blue-dark));
+  border-radius:0 2px 2px 0;
+  opacity:0;
+  transition:opacity .2s;
+}
+.file-row:hover{
+  border-color:rgba(255,255,255,0.13);
+  background:var(--surface2);
+  transform:translateX(2px);
+}
+.file-row:hover::before{opacity:1}
+
+.file-row.done-glow{
+  border-color:rgba(46,204,113,0.2);
+  background:rgba(46,204,113,0.04);
+}
+.file-row.done-glow::before{
+  background:linear-gradient(180deg,var(--done),#27ae60);
+  opacity:1;
+}
+
+@keyframes rowEnter{
+  from{opacity:0;transform:translateX(-12px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+.file-row.drag-insert-before{border-top:2px solid var(--silver);box-shadow:0 -2px 12px rgba(184,189,200,0.3)}
+.file-row.drag-insert-after{border-bottom:2px solid var(--silver);box-shadow:0 2px 12px rgba(184,189,200,0.3)}
+.file-row.dragging{opacity:.25;transform:scale(.98)}
+
+.dh{
+  font-size:12px;color:var(--text-muted);
+  cursor:grab;flex-shrink:0;letter-spacing:1px;line-height:1;padding:0 2px;
+  transition:color .2s;
+}
+.dh:hover{color:var(--silver)}
+
+/* ─── バッジ ─── */
+.sbadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+  color:#fff;
+  border-radius:7px;
+  font-size:10px;font-weight:700;
+  padding:3px 9px;
+  white-space:nowrap;flex-shrink:0;min-width:54px;
+  font-family:'Noto Serif JP',serif;
+  box-shadow:0 0 12px var(--blue-glow), 0 2px 4px rgba(0,0,0,0.3);
+  animation:badgePulse 3s ease-in-out infinite;
+  position:relative;
+  overflow:hidden;
+}
+.sbadge::after{
+  content:'';
+  position:absolute;
+  top:-50%;left:-60%;
+  width:40%;height:200%;
+  background:rgba(255,255,255,0.25);
+  transform:skewX(-20deg);
+  animation:badgeShimmer 3s ease-in-out infinite;
+}
+@keyframes badgeShimmer{
+  0%,70%,100%{left:-60%}
+  40%{left:160%}
+}
+@keyframes badgePulse{
+  0%,100%{box-shadow:0 0 12px var(--blue-glow), 0 2px 4px rgba(0,0,0,0.3)}
+  50%{box-shadow:0 0 20px rgba(42,95,216,0.5), 0 2px 4px rgba(0,0,0,0.3)}
+}
+.sbadge.ep{
+  background:linear-gradient(135deg, #1a3f8a, #112d70);
+  box-shadow:0 0 8px rgba(20,55,140,0.4), 0 2px 4px rgba(0,0,0,0.3);
+}
+.sbadge.ep::after{animation:none}
+
+.fi-wrap{flex:1;min-width:0}
+.fi-orig{
+  font-size:10px;color:var(--text-muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'DM Mono',monospace;
+}
+.fi-new{
+  font-size:11px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--text);font-family:'DM Mono',monospace;
+}
+
+/* ─── 枝ボタン ─── */
+.eb{
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  border-radius:6px;cursor:pointer;
+  font-size:10px;font-weight:500;
+  font-family:'DM Mono',monospace;
+  color:var(--text-dim);padding:3px 7px;
+  transition:all .15s;flex-shrink:0;
+}
+.eb:hover:not(:disabled){
+  border-color:var(--silver);
+  color:var(--silver);
+  box-shadow:0 0 8px rgba(184,189,200,0.2);
+}
+.eb.active{
+  background:linear-gradient(135deg,#1a3f8a,#112d70);
+  border-color:#1a3f8a;color:#fff;
+  box-shadow:0 0 8px rgba(20,55,140,0.4);
+}
+.eb:disabled{opacity:.15;cursor:not-allowed}
+
+.fr{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fr button.rm{
+  background:none;border:none;cursor:pointer;
+  font-size:14px;color:var(--text-muted);
+  padding:0;line-height:1;font-family:inherit;
+  transition:color .15s;
+}
+.fr button.rm:hover{color:var(--blue)}
+
+.fr a{
+  font-size:11px;font-weight:600;
+  color:var(--silver);text-decoration:none;
+  font-family:'DM Mono',monospace;
+  padding:3px 9px;
+  border:1px solid rgba(184,189,200,0.3);
+  border-radius:6px;
+  background:rgba(184,189,200,0.08);
+  transition:all .15s;
+}
+.fr a:hover{
+  background:rgba(184,189,200,0.18);
+  box-shadow:0 0 12px rgba(184,189,200,0.2);
+}
+
+/* ─── ステータステキスト ─── */
+.sw{font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace}
+.si{font-size:10px;color:rgba(184,189,200,0.7);font-family:'DM Mono',monospace}
+.sp{
+  font-size:10px;color:var(--text-dim);
+  font-family:'DM Mono',monospace;
+  animation:processing .8s ease-in-out infinite alternate;
+}
+@keyframes processing{
+  from{opacity:.4}
+  to{opacity:1}
+}
+.sd{
+  font-size:10px;color:var(--done);
+  font-family:'DM Mono',monospace;
+  text-shadow:0 0 8px var(--done-glow);
+  animation:donePulse 2s ease-in-out infinite;
+}
+@keyframes donePulse{
+  0%,100%{text-shadow:0 0 8px var(--done-glow)}
+  50%{text-shadow:0 0 16px rgba(46,204,113,0.6)}
+}
+.se{font-size:10px;color:var(--blue);font-family:'DM Mono',monospace}
+
+/* ─── プログレスバー ─── */
+#pw{display:none;margin-bottom:12px}
+#pt{
+  font-size:11px;color:var(--text-dim);
+  margin-bottom:8px;
+  font-family:'DM Mono',monospace;
+}
+.pb-wrap{
+  background:rgba(255,255,255,0.05);
+  border-radius:100px;height:4px;overflow:hidden;
+  border:1px solid var(--border);
+}
+#pb{
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), #6fa3ff, var(--blue));
+  background-size:200% auto;
+  border-radius:100px;
+  transition:width .4s cubic-bezier(.16,1,.3,1);
+  width:0%;
+  animation:progressGlow 1.5s linear infinite;
+  box-shadow:0 0 8px var(--blue-glow);
+}
+@keyframes progressGlow{
+  0%{background-position:0% center;box-shadow:0 0 8px var(--blue-glow)}
+  50%{background-position:100% center;box-shadow:0 0 16px rgba(42,95,216,0.5)}
+  100%{background-position:200% center;box-shadow:0 0 8px var(--blue-glow)}
+}
+
+/* ─── アクションボタン ─── */
+#aw{gap:10px;display:none;animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .2s both}
+#aw button{
+  padding:13px 24px;
+  border-radius:10px;
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  font-family:'Noto Serif JP',serif;
+  border:1px solid rgba(42,95,216,0.4);
+  background:linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  color:#fff;
+  transition:all .2s;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 20px var(--blue-glow), 0 4px 12px rgba(0,0,0,0.3);
+}
+#aw button::before{
+  content:'';
+  position:absolute;
+  top:-50%;left:-60%;
+  width:40%;height:200%;
+  background:rgba(255,255,255,0.2);
+  transform:skewX(-20deg);
+  transition:left .5s;
+}
+#aw button:hover:not(:disabled)::before{left:160%}
+#aw button:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:0 0 32px rgba(42,95,216,0.5), 0 8px 24px rgba(0,0,0,0.3);
+}
+#aw button:active:not(:disabled){transform:translateY(0)}
+#aw button:disabled{opacity:.3;cursor:not-allowed;transform:none}
+
+#zbtn{
+  background:rgba(184,189,200,0.1)!important;
+  border-color:rgba(184,189,200,0.4)!important;
+  color:var(--silver)!important;
+  box-shadow:0 0 20px rgba(184,189,200,0.15), 0 4px 12px rgba(0,0,0,0.3)!important;
+}
+#zbtn:hover:not(:disabled){
+  background:rgba(184,189,200,0.18)!important;
+  box-shadow:0 0 32px rgba(184,189,200,0.3), 0 8px 24px rgba(0,0,0,0.3)!important;
+}
+
+/* ─── フッターノート ─── */
+.note{
+  font-size:10px;color:var(--text-muted);
+  text-align:center;margin-top:32px;line-height:2;
+  font-family:'DM Mono',monospace;
+  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .3s both;
+}
+.note span{
+  display:inline-block;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 16px;
+}
+
+/* ─── ヘルプモーダル ─── */
+#help-modal{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);
+  z-index:100;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-inner{
+  background:#0e0e1a;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  max-width:640px;width:100%;
+  max-height:88vh;overflow-y:auto;
+  padding:32px;position:relative;
+  box-shadow:0 0 60px rgba(42,95,216,0.15), 0 40px 80px rgba(0,0,0,0.5);
+  transition:background var(--transition-speed) ease;
+}
+html.light .modal-inner{
+  background:#ffffff;
+  border-color:rgba(0,0,0,0.1);
+  box-shadow:0 0 40px rgba(42,95,216,0.08), 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-close{
+  position:absolute;top:18px;right:18px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  cursor:pointer;font-size:16px;
+  color:var(--text-muted);line-height:1;
+  font-family:inherit;
+  border-radius:8px;
+  width:32px;height:32px;
+  transition:all .2s;
+}
+.modal-close:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+.modal-h{
+  font-size:18px;font-weight:700;margin-bottom:4px;
+  font-family:'Noto Serif JP',serif;
+  background:linear-gradient(135deg, #d8dce8, #2A5FD8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.modal-sub{font-size:11px;color:var(--text-muted);margin-bottom:24px;font-family:'DM Mono',monospace}
+.modal-section{margin-bottom:22px}
+.modal-section-title{
+  font-size:9px;font-weight:600;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.15em;
+  margin-bottom:10px;font-family:'DM Mono',monospace;
+}
+.modal-section ol{
+  font-size:12px;line-height:2.1;padding-left:1.4em;
+  color:var(--text-dim);font-family:'DM Mono',monospace;
+}
+.modal-section table{
+  font-size:12px;width:100%;border-collapse:collapse;
+  font-family:'DM Mono',monospace;
+}
+.modal-section td{
+  padding:7px 0;color:var(--text-dim);line-height:1.7;
+  border-top:1px solid var(--border);
+}
+.modal-section td:first-child{
+  padding-right:14px;color:var(--text);font-weight:500;
+  white-space:nowrap;vertical-align:top;
+}
+.modal-code{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:8px;padding:12px 16px;
+  font-size:11px;line-height:2.2;
+  color:var(--text-dim);font-family:'DM Mono',monospace;
+}
+.modal-code b{color:var(--silver)}
+
+/* ─── スパークルバースト ─── */
+.sparkle-burst{
+  position:fixed;pointer-events:none;z-index:999;
+}
+
+/* ─── スクロールバー ─── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+/* ─── 枝番入力 ─── */
+.eda-start-input{
+  width:34px;font-size:10px;text-align:center;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);border-radius:5px;
+  padding:3px;font-family:'DM Mono',monospace;color:var(--text);
+  outline:none;
+}
+.eda-start-input:focus{border-color:var(--silver)}
+
+/* ─── モード切り替えトグル ─── */
+.mode-toggle{
+  display:flex;align-items:center;gap:8px;
+  margin-left:auto;
+  flex-shrink:0;
+}
+.mode-toggle-label{
+  font-size:10px;color:var(--text-muted);
+  font-family:'DM Mono',monospace;
+  transition:color var(--transition-speed) ease;
+  letter-spacing:.05em;
+  user-select:none;
+}
+.toggle-track{
+  width:44px;height:24px;
+  border-radius:100px;
+  background:rgba(255,255,255,0.1);
+  border:1px solid var(--border);
+  cursor:pointer;
+  position:relative;
+  transition:background var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow .2s;
+  flex-shrink:0;
+}
+.toggle-track:hover{
+  box-shadow:0 0 12px var(--blue-glow);
+  border-color:var(--blue);
+}
+html.light .toggle-track{
+  background:rgba(42,95,216,0.1);
+}
+html.light .toggle-track:hover{
+  box-shadow:0 0 12px var(--blue-glow);
+}
+.toggle-thumb{
+  position:absolute;
+  top:3px;left:3px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--text-dim), var(--text-muted));
+  transition:transform var(--transition-speed) cubic-bezier(.34,1.56,.64,1), background var(--transition-speed) ease;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+html.light .toggle-thumb{
+  transform:translateX(20px);
+  background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+  box-shadow:0 0 8px var(--blue-glow), 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-icon{
+  font-size:13px;
+  transition:transform .3s ease, opacity .3s ease;
+  line-height:1;
+}
+html.light .toggle-icon.dark-icon{opacity:.4}
+html.light .toggle-icon.light-icon{opacity:1;filter:drop-shadow(0 0 4px rgba(184,189,200,0.6))}
+html:not(.light) .toggle-icon.dark-icon{opacity:1}
+html:not(.light) .toggle-icon.light-icon{opacity:.35}
+</style>
+</head>
+<body>
+
+<canvas id="sparkle-canvas"></canvas>
+
+<div class="wrap">
+  <div class="header">
+    <div class="title-row">
+      <span class="crown">⚖</span>
+      <h1>EvidenStamp</h1>
+      <button class="help-btn" onclick="document.getElementById('help-modal').style.display='flex'">?</button>
+      <div class="mode-toggle">
+        <span class="toggle-icon dark-icon">🌙</span>
+        <div class="toggle-track" onclick="toggleMode()" title="ダーク/ライト切り替え">
+          <div class="toggle-thumb" id="toggle-thumb"></div>
+        </div>
+        <span class="toggle-icon light-icon">☀️</span>
+      </div>
+    </div>
+    <p class="sub">PDFに証拠番号スタンプを自動付与・ファイル名変更 &nbsp;·&nbsp; すべてブラウザ内で完結</p>
+  </div>
+
+  <div class="panel">
+    <div class="ptitle">基本設定</div>
+    <div class="row">
+      <div class="field">
+        <div class="fl">符号</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="sym-sel" onchange="onSymSel();save()">
+            <option value="甲">甲</option>
+            <option value="乙">乙</option>
+            <option value="丙">丙</option>
+            <option value="丁">丁</option>
+            <option value="戊">戊</option>
+            <option value="弁">弁</option>
+            <option value="資料">資料</option>
+            <option value="疎甲">疎甲</option>
+            <option value="疎乙">疎乙</option>
+            <option value="__c__">カスタム...</option>
+          </select>
+          <input type="text" id="csym" class="sym-custom" placeholder="入力" oninput="refreshList();save()" maxlength="10" style="display:none">
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl">開始番号</div>
+        <div class="num-grp">
+          <button onclick="adj(-1)">−</button>
+          <input type="number" id="start-num" value="1" min="1" max="999" onchange="refreshList();save()">
+          <button onclick="adj(1)">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl">番号スタイル</div>
+        <select id="num-style" onchange="refreshList();save()">
+          <option value="mints">甲001 / 甲001-1（mints）</option>
+          <option value="formal" selected>甲第1号証 / 甲第1号証の1（正式）</option>
+          <option value="gocho">甲1号証 / 甲1号証の1（号証）</option>
+          <option value="hyphen">甲1 / 甲1-1（ハイフン）</option>
+          <option value="simple">甲1 / 甲1の1（シンプル）</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="fl">ファイル名の区切り</div>
+        <select id="separator" onchange="refreshList();save()">
+          <option value="space">半角スペース　甲001 書類名</option>
+          <option value="underscore" selected>アンダーバー　甲001_書類名</option>
+          <option value="kakko">隅付き括弧　【甲001】書類名</option>
+          <option value="paren">括弧　(甲001)書類名</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div class="ptitle" style="margin-bottom:10px">スタンプ設定</div>
+    <div class="row">
+      <div class="field">
+        <div class="fl">フォントサイズ (px)</div>
+        <input type="number" class="sm" id="stamp-size" value="14" min="8" max="40" onchange="save()">
+      </div>
+      <div class="field">
+        <div class="fl">文字色</div>
+        <input type="color" id="stamp-color" value="#BF3528" onchange="save()">
+      </div>
+      <div class="field">
+        <div class="fl">右端余白 (pt)</div>
+        <input type="number" class="sm" id="margin-r" value="14" min="0" max="300" onchange="save()">
+      </div>
+      <div class="field">
+        <div class="fl">上端余白 (pt)</div>
+        <input type="number" class="sm" id="margin-t" value="14" min="0" max="300" onchange="save()">
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="stamp-bg" onchange="save()"> 白背景</label>
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="page-num" onchange="save()"> ページ番号付与</label>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <div class="ptitle" style="margin-bottom:10px">出力設定</div>
+    <div class="row">
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="del-meta" onchange="save()"> メタデータ削除</label>
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="merge-eda" onchange="save()"> 枝番グループを結合</label>
+      </div>
+    </div>
+  </div>
+
+  <div id="dropzone" onclick="document.getElementById('fi').click()">
+    <input type="file" id="fi" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none" onchange="handleFiles(this.files)">
+    <span class="dz-icon">📄</span>
+    <div class="dz-t">PDFをドロップ、またはクリックして選択</div>
+    <div class="dz-s">PDF · JPG · PNG &nbsp;対応 &nbsp;·&nbsp; 複数ファイル可 &nbsp;·&nbsp; 外部送信なし</div>
+  </div>
+
+  <div id="flc">
+    <div class="flc-top">
+      <span id="flabel" class="fc"></span>
+      <span class="fh">「枝」で枝番 · ドラッグで並び替え</span>
+      <button class="fa" onclick="clearAll()">すべて削除</button>
+    </div>
+    <div id="fl"></div>
+  </div>
+
+  <div id="pw">
+    <div id="pt"></div>
+    <div class="pb-wrap"><div id="pb"></div></div>
+  </div>
+
+  <div id="aw">
+    <button id="pbtn" onclick="processAll()" style="flex:1">✦ スタンプを付与する</button>
+    <button id="zbtn" onclick="downloadZip()">ZIP でまとめてDL</button>
+  </div>
+
+  <p class="note"><span>🔒 すべての処理はブラウザ内で完結。PDFは外部サーバーに送信されません。<br>設定はブラウザに自動保存されます。</span></p>
+</div>
+
+<!-- ヘルプモーダル -->
+<div id="help-modal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="document.getElementById('help-modal').style.display='none'">×</button>
+    <div class="modal-h">EvidenStamp 使い方</div>
+    <p class="modal-sub">すべての処理はブラウザ内で完結。PDFは外部に送信されません。</p>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="modal-section">
+        <div class="modal-section-title">基本的な使い方</div>
+        <ol>
+          <li>設定パネルで符号・番号スタイル・区切り文字などを設定</li>
+          <li>PDFをドロップゾーンにドラッグ＆ドロップ（またはクリックして選択）</li>
+          <li>必要に応じてファイルの並び替え・枝番設定</li>
+          <li>「スタンプを付与する」をクリック</li>
+          <li>各行の「DL」で個別保存、または「ZIP でまとめてDL」で一括保存</li>
+        </ol>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">基本設定</div>
+        <table>
+          <tr><td>符号</td><td>甲〜疎乙の9種類から選択。「カスタム...」で任意の文字列（例：別紙）も入力可能。</td></tr>
+          <tr><td>番号スタイル</td><td>mints形式（甲001）、正式（甲第1号証）、号証、ハイフン、シンプルの5種類。枝番のセパレータも自動で切り替わります。</td></tr>
+          <tr><td>区切り文字</td><td>ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
+        </table>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">枝番の使い方</div>
+        <p style="font-size:12px;line-height:1.9;color:var(--text-dim);margin-bottom:10px;font-family:'DM Mono',monospace">ファイル行右側の「枝」ボタンをオンにすると、そのファイルを直前のグループの枝番として扱います。先頭ファイルは枝番にできません。</p>
+        <div class="modal-code">
+          メール本文.pdf　→　<b>甲第2号証の1</b>　（次が枝なので自動での1になる）<br>
+          添付PDF1.pdf　[枝]　→　<b>甲第2号証の2</b><br>
+          添付PDF2.pdf　[枝]　→　<b>甲第2号証の3</b>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">その他の機能</div>
+        <table>
+          <tr><td>並び替え</td><td>各行左端の「⠿⠿」をドラッグして順序を変更できます。並び替え後は再付与が必要です。</td></tr>
+          <tr><td>再付与</td><td>「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
+          <tr><td>JPG・PNG</td><td>画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
+          <tr><td>白背景</td><td>スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
+          <tr><td>ページ番号付与</td><td>各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
+          <tr><td>枝番グループを結合</td><td>ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
+          <tr><td>メタデータ削除</td><td>出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
+          <tr><td>設定の保存</td><td>符号・スタイル・スタンプ設定などはブラウザに自動保存され、次回起動時に復元されます。</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── パーティクルシステム ─── */
+(function(){
+  const canvas = document.getElementById('sparkle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const DARK_COLORS = [
+    'rgba(80,140,255,',
+    'rgba(110,170,255,',
+    'rgba(140,200,255,',
+    'rgba(60,110,220,',
+    'rgba(180,210,255,',
+  ];
+  const LIGHT_COLORS = [
+    'rgba(60,110,220,',
+    'rgba(80,140,255,',
+    'rgba(40,90,200,',
+    'rgba(100,160,240,',
+    'rgba(50,120,210,',
+  ];
+  function getColors(){ return document.documentElement.classList.contains('light') ? DARK_COLORS : LIGHT_COLORS; }
+
+  class Particle {
+    constructor(){this.reset(true)}
+    reset(init){
+      this.x = Math.random() * W;
+      this.y = init ? Math.random() * H : H + 10;
+      this.size = Math.random() * 2.5 + 0.5;
+      this.speedY = -(Math.random() * 0.4 + 0.1);
+      this.speedX = (Math.random() - 0.5) * 0.2;
+      this.opacity = 0;
+      this.maxOp = Math.random() * 0.5 + 0.1;
+      this.color = getColors()[Math.floor(Math.random() * DARK_COLORS.length)];
+      this.life = 0;
+      this.maxLife = Math.random() * 400 + 200;
+      this.twinkle = Math.random() * Math.PI * 2;
+      this.twinkleSpeed = Math.random() * 0.05 + 0.01;
+    }
+    update(){
+      this.life++;
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.twinkle += this.twinkleSpeed;
+      const progress = this.life / this.maxLife;
+      if(progress < 0.2) this.opacity = (progress / 0.2) * this.maxOp;
+      else if(progress > 0.8) this.opacity = ((1 - progress) / 0.2) * this.maxOp;
+      else this.opacity = this.maxOp;
+      this.opacity *= (0.6 + Math.sin(this.twinkle) * 0.4);
+      if(this.life >= this.maxLife || this.y < -10) this.reset(false);
+    }
+    draw(){
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      // 四芒星スパークル
+      const s = this.size;
+      ctx.fillStyle = this.color + '1)';
+      ctx.shadowColor = this.color + '0.8)';
+      ctx.shadowBlur = s * 4;
+      ctx.beginPath();
+      const arms = 4;
+      for(let i = 0; i < arms * 2; i++){
+        const angle = (i * Math.PI) / arms + this.twinkle * 0.3;
+        const r = i % 2 === 0 ? s * 2 : s * 0.4;
+        i === 0 ? ctx.moveTo(this.x + Math.cos(angle) * r, this.y + Math.sin(angle) * r)
+                : ctx.lineTo(this.x + Math.cos(angle) * r, this.y + Math.sin(angle) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for(let i = 0; i < 60; i++) particles.push(new Particle());
+  window._particles = particles;
+
+  function loop(){
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {p.update(); p.draw();});
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // ファイル完了時のバーストエフェクト
+  window.burstAt = function(x, y){
+    const burst = [];
+    for(let i = 0; i < 12; i++){
+      const angle = (i / 12) * Math.PI * 2;
+      const speed = Math.random() * 3 + 1;
+      burst.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: Math.random() * 3 + 1,
+        opacity: 1,
+        color: getColors()[Math.floor(Math.random() * DARK_COLORS.length)],
+        life: 0
+      });
+    }
+    function animBurst(){
+      burst.forEach(p => {
+        p.life++;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1;
+        p.opacity = Math.max(0, 1 - p.life / 40);
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color + '1)';
+        ctx.shadowColor = p.color + '0.8)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+      if(burst.some(p => p.life < 40)) requestAnimationFrame(animBurst);
+    }
+    animBurst();
+  };
+})();
+
+/* ─── アプリロジック（元のコードそのまま） ─── */
+let files=[], dragSrcIdx=null;
+function clearInsertMarkers(){document.querySelectorAll('.file-row').forEach(r=>{r.classList.remove('drag-insert-before','drag-insert-after');delete r.dataset.insertBefore;});}
+const SK='evstamp_settings';
+
+function save(){
+  try{
+    localStorage.setItem(SK,JSON.stringify({
+      symSel:v('sym-sel'),csym:v('csym'),
+      startNum:v('start-num'),numStyle:v('num-style'),separator:v('separator'),
+      stampSize:v('stamp-size'),stampColor:v('stamp-color'),
+      marginR:v('margin-r'),marginT:v('margin-t'),
+      stampBg:c('stamp-bg'),delMeta:c('del-meta'),
+      pageNum:c('page-num'),mergeEda:c('merge-eda'),
+    }));
+  }catch(e){}
+}
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SK));
+    if(!s)return;
+    const set=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).value=val;};
+    const chk=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).checked=!!val;};
+    set('sym-sel',s.symSel);set('csym',s.csym);
+    set('start-num',s.startNum);set('num-style',s.numStyle);set('separator',s.separator);
+    set('stamp-size',s.stampSize);set('stamp-color',s.stampColor);
+    set('margin-r',s.marginR);set('margin-t',s.marginT);
+    chk('stamp-bg',s.stampBg);chk('del-meta',s.delMeta);
+    chk('page-num',s.pageNum);chk('merge-eda',s.mergeEda);
+    onSymSel();
+  }catch(e){}
+}
+function v(id){return document.getElementById(id)?.value;}
+function c(id){return document.getElementById(id)?.checked;}
+
+function getSym(){
+  return v('sym-sel')==='__c__'?(v('csym')||'甲'):v('sym-sel');
+}
+function onSymSel(){
+  const isC=v('sym-sel')==='__c__';
+  document.getElementById('csym').style.display=isC?'':'none';
+  if(!isC)refreshList();
+}
+
+function adj(d){
+  const i=document.getElementById('start-num');
+  i.value=Math.max(1,Math.min(999,(parseInt(i.value)||1)+d));
+  refreshList();save();
+}
+
+function calcStamps(){
+  const start=parseInt(v('start-num')||'1');
+  let main=start-1, curEdaStart=1;
+  const out=[];
+  for(let i=0;i<files.length;i++){
+    if(i===0)files[i].isEda=false;
+    if(!files[i].isEda){
+      main++;
+      const nextEda=i+1<files.length&&files[i+1].isEda;
+      curEdaStart=parseInt(files[i].edaStart)||1;
+      out.push({main,eda:nextEda?curEdaStart:0});
+    }else{
+      out.push({main,eda:out[out.length-1].eda+1});
+    }
+  }
+  return out;
+}
+
+function fmtStamp(main,eda){
+  const s=v('num-style'),t=getSym();
+  const dash=s==='mints'||s==='hyphen';
+  let base;
+  if(s==='mints')base=`${t}${String(main).padStart(3,'0')}`;
+  else if(s==='formal')base=`${t}第${main}号証`;
+  else if(s==='gocho')base=`${t}${main}号証`;
+  else base=`${t}${main}`;
+  if(eda>0)base+=dash?`-${eda}`:`の${eda}`;
+  return base;
+}
+
+function getStamps(){return calcStamps().map(({main,eda})=>fmtStamp(main,eda));}
+
+function outName(item,stamp){
+  const orig=item.isImg?item.file.name.replace(/\.(jpe?g|png)$/i,'.pdf'):item.file.name;
+  const sep=v('separator');
+  if(sep==='kakko')return`【${stamp}】${orig}`;
+  if(sep==='paren')return`(${stamp})${orig}`;
+  return`${stamp}${sep==='space'?' ':'_'}${orig}`;
+}
+
+async function handleFiles(fl){
+  for(const f of fl){
+    if(f.type==='application/pdf')
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1});
+    else if(/image\/(jpeg|png)/.test(f.type))
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1});
+  }
+  document.getElementById('fi').value='';
+  refreshUI();
+}
+
+function clearAll(){
+  files.forEach(f=>{if(f.url)URL.revokeObjectURL(f.url);});
+  files=[];
+  ['flc','aw','pw'].forEach(id=>document.getElementById(id).style.display='none');
+}
+
+function removeFile(i){
+  if(files[i].url)URL.revokeObjectURL(files[i].url);
+  files.splice(i,1);
+  if(files.length)files[0].isEda=false;
+  refreshUI();
+}
+
+function toggleEda(i){
+  if(i===0)return;
+  files[i].isEda=!files[i].isEda;
+  resetDone();refreshList();
+}
+function setEdaStart(i,val){
+  files[i].edaStart=Math.max(1,Math.min(999,parseInt(val)||1));
+  resetDone();refreshList();
+}
+
+function resetDone(){
+  files.forEach(f=>{
+    if(f.status==='done'){
+      if(f.url)URL.revokeObjectURL(f.url);
+      f.url=null;f.blob=null;
+      f.status=f.isImg?'img':'pending';
+    }
+  });
+}
+
+function refreshUI(){
+  if(!files.length){clearAll();return;}
+  document.getElementById('flc').style.display='block';
+  document.getElementById('aw').style.display='flex';
+  document.getElementById('flabel').textContent=`${files.length} ファイル`;
+  refreshList();
+}
+
+function refreshList(){
+  const list=document.getElementById('fl');list.innerHTML='';
+  const stamps=getStamps();
+  const raw=calcStamps();
+  files.forEach((item,i)=>{
+    const stamp=stamps[i],nn=outName(item,stamp);
+    const isEP=!item.isEda&&raw[i].eda>0;
+    let right='';
+    if(item.status==='pending')right=`<span class="sw">待機中</span><button class="rm" onclick="removeFile(${i})">×</button>`;
+    else if(item.status==='img')right=`<span class="si">画像→PDF</span><button class="rm" onclick="removeFile(${i})">×</button>`;
+    else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
+    else if(item.status==='done')right=`<span class="sd">✦完了</span><a href="${item.url}" download="${nn}">DL</a>`;
+    else right=`<span class="se">エラー</span><button class="rm" onclick="removeFile(${i})">×</button>`;
+    const edaStartInput=isEP?`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0"><span style="font-size:10px;color:var(--text-muted)">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" class="eda-start-input" title="枝番開始番号"></div>`:'';
+    const el=document.createElement('div');
+    el.className='file-row'+(item.status==='done'?' done-glow':'');
+    el.draggable=true;el.dataset.idx=i;
+    el.innerHTML=`
+      <span class="dh">⠿⠿</span>
+      <span class="sbadge${item.isEda||isEP?' ep':''}">${stamp}</span>
+      <div class="fi-wrap">
+        <div class="fi-orig">${item.file.name}${item.isImg?' → .pdf':''}</div>
+        <div class="fi-new">→ ${nn}</div>
+      </div>
+      ${edaStartInput}
+      <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})"${i===0?' disabled':''}>枝</button>
+      <div class="fr">${right}</div>`;
+    el.addEventListener('dragstart',e=>{dragSrcIdx=i;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>{el.classList.remove('dragging');clearInsertMarkers();});
+    el.addEventListener('dragover',e=>{
+      e.preventDefault();
+      clearInsertMarkers();
+      const rect=el.getBoundingClientRect();
+      const insertBefore=e.clientY<rect.top+rect.height/2;
+      el.classList.add(insertBefore?'drag-insert-before':'drag-insert-after');
+      el.dataset.insertBefore=insertBefore?'1':'0';
+    });
+    el.addEventListener('drop',e=>{
+      e.preventDefault();
+      const insertBefore=el.dataset.insertBefore==='1';
+      clearInsertMarkers();
+      const src=dragSrcIdx;
+      let dst=parseInt(el.dataset.idx);
+      if(src===null||src===dst)return;
+      const[moved]=files.splice(src,1);
+      if(src<dst)dst--;
+      const insertAt=insertBefore?dst:dst+1;
+      files.splice(insertAt,0,moved);
+      if(files.length)files[0].isEda=false;
+      resetDone();dragSrcIdx=null;refreshUI();
+    });
+    list.appendChild(el);
+  });
+  document.getElementById('zbtn').disabled=!files.length||!files.every(f=>f.status==='done');
+}
+
+/* ─── ドロップゾーン ─── */
+const dz=document.getElementById('dropzone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('over');
+  const valid=Array.from(e.dataTransfer.files).filter(f=>/application\/pdf|image\/(jpeg|png)/.test(f.type));
+  if(valid.length)handleFiles(valid);
+});
+
+/* ─── PDF処理 ─── */
+async function imageToPdf(file){
+  const doc=await PDFLib.PDFDocument.create();
+  const bytes=await file.arrayBuffer();
+  const img=file.type==='image/jpeg'?await doc.embedJpg(bytes):await doc.embedPng(bytes);
+  const A4W=595.28,A4H=841.89,mg=28;
+  const scale=Math.min((A4W-mg*2)/img.width,(A4H-mg*2)/img.height,1);
+  const w=img.width*scale,h=img.height*scale;
+  const page=doc.addPage([A4W,A4H]);
+  page.drawImage(img,{x:(A4W-w)/2,y:(A4H-h)/2,width:w,height:h});
+  return new File([await doc.save()],file.name.replace(/\.(jpe?g|png)$/i,'.pdf'),{type:'application/pdf'});
+}
+
+function makeStampPng(text){
+  const fs=parseInt(v('stamp-size'))||14;
+  const color=v('stamp-color')||'#BF3528';
+  const bg=c('stamp-bg');
+  const pad=bg?5:0,DPR=4;
+  const cv=document.createElement('canvas');
+  const ctx=cv.getContext('2d');
+  ctx.font=`500 ${DPR*fs}px system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif`;
+  const W=Math.ceil(ctx.measureText(text).width/DPR)+pad*2+4;
+  const H=fs+pad*2+4;
+  cv.width=W*DPR;cv.height=H*DPR;
+  ctx.scale(DPR,DPR);
+  if(bg){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);}
+  ctx.font=`500 ${fs}px system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif`;
+  ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText(text,pad,pad+2);
+  const d=cv.toDataURL('image/png'),b=atob(d.split(',')[1]),u=new Uint8Array(b.length);
+  for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+  return{bytes:u,w:W,h:H};
+}
+
+async function addPageNumbers(doc){
+  const pages=doc.getPages();
+  const total=pages.length;
+  if(total===0)return;
+  const font=await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const fs=9;
+  pages.forEach((page,idx)=>{
+    const{width}=page.getSize();
+    const txt=total>1?`${idx+1} / ${total}`:`${idx+1}`;
+    const tw=font.widthOfTextAtSize(txt,fs);
+    page.drawText(txt,{x:(width-tw)/2,y:16,size:fs,font,color:PDFLib.rgb(0.5,0.5,0.5)});
+  });
+}
+
+async function stampPdf(item,text){
+  const pdfFile=item.isImg?await imageToPdf(item.file):item.file;
+  const doc=await PDFLib.PDFDocument.load(await pdfFile.arrayBuffer());
+  if(c('del-meta')){
+    doc.setTitle('');doc.setAuthor('');doc.setSubject('');
+    doc.setKeywords([]);doc.setCreator('');doc.setProducer('');
+  }
+  if(c('page-num'))await addPageNumbers(doc);
+  const{bytes,w,h}=makeStampPng(text);
+  const png=await doc.embedPng(bytes);
+  const page=doc.getPages()[0];
+  const{width,height}=page.getSize();
+  const mR=parseInt(v('margin-r'))||14;
+  const mT=parseInt(v('margin-t'))||14;
+  page.drawImage(png,{x:width-w-mR,y:height-h-mT,width:w,height:h});
+  return new Blob([await doc.save()],{type:'application/pdf'});
+}
+
+async function processAll(){
+  if(!files.length)return;
+  resetDone();
+  const btn=document.getElementById('pbtn');btn.disabled=true;btn.textContent='処理中...';
+  document.getElementById('pw').style.display='block';
+  const stamps=getStamps();let done=0;
+  for(let i=0;i<files.length;i++){
+    const item=files[i];
+    item.status='processing';
+    document.getElementById('pt').textContent=`処理中... ${i+1} / ${files.length}`;
+    document.getElementById('pb').style.width=`${i/files.length*100}%`;
+    refreshList();await new Promise(r=>setTimeout(r,0));
+    try{
+      const blob=await stampPdf(item,stamps[i]);
+      if(item.url)URL.revokeObjectURL(item.url);
+      item.blob=blob;item.url=URL.createObjectURL(blob);item.status='done';
+      // 完了バースト
+      const rows=document.querySelectorAll('.file-row');
+      if(rows[i]){
+        const rect=rows[i].getBoundingClientRect();
+        window.burstAt(rect.right - 40, rect.top + rect.height / 2);
+      }
+    }catch(e){console.error(e);item.status='error';}
+    done++;document.getElementById('pb').style.width=`${done/files.length*100}%`;
+    refreshList();
+  }
+  document.getElementById('pt').textContent=`✦ 完了 — ${done} ファイル処理しました`;
+  btn.disabled=false;btn.textContent='✦ スタンプを付与する';
+}
+
+async function downloadZip(){
+  const zb=document.getElementById('zbtn');zb.disabled=true;zb.textContent='作成中...';
+  const zip=new JSZip();
+  const stamps=getStamps();
+  const raw=calcStamps();
+
+  if(c('merge-eda')){
+    let i=0;
+    while(i<files.length){
+      const item=files[i];
+      if(item.status!=='done'||!item.blob){i++;continue;}
+      const groupEnd=findGroupEnd(i,raw);
+      if(groupEnd===i){
+        zip.file(outName(item,stamps[i]),await item.blob.arrayBuffer());
+        i++;
+      }else{
+        const merged=await PDFLib.PDFDocument.create();
+        let allDone=true;
+        for(let j=i;j<=groupEnd;j++){
+          if(files[j].status!=='done'||!files[j].blob){allDone=false;break;}
+          const src=await PDFLib.PDFDocument.load(await files[j].blob.arrayBuffer());
+          const pages=await merged.copyPages(src,src.getPageIndices());
+          pages.forEach(p=>merged.addPage(p));
+        }
+        if(allDone){
+          const firstStamp=stamps[i];
+          const lastStamp=stamps[groupEnd];
+          const rangeStamp=`${firstStamp}〜${lastStamp.replace(/.*[-の]/,'')}`;
+          const mergedName=outName(files[i],firstStamp).replace(firstStamp,rangeStamp);
+          zip.file(mergedName,await merged.save());
+        }
+        i=groupEnd+1;
+      }
+    }
+  }else{
+    for(let i=0;i<files.length;i++){
+      const item=files[i];
+      if(item.status!=='done'||!item.blob)continue;
+      zip.file(outName(item,stamps[i]),await item.blob.arrayBuffer());
+    }
+  }
+
+  const blob=await zip.generateAsync({type:'blob'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${getSym()}号証_一式.zip`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  zb.disabled=false;zb.textContent='ZIP でまとめてDL';
+}
+
+function findGroupEnd(startIdx,raw){
+  const m=raw[startIdx].main;
+  let end=startIdx;
+  for(let j=startIdx+1;j<files.length;j++){
+    if(raw[j].main===m)end=j;else break;
+  }
+  return end;
+}
+
+/* ─── ダーク/ライト切り替え ─── */
+function toggleMode(){
+  const isLight = document.documentElement.classList.toggle('light');
+  try{ localStorage.setItem('evstamp_theme', isLight ? 'light' : 'dark'); }catch(e){}
+  // 既存パーティクルの色を即時切り替え
+  if(window._particles){
+    const colors = document.documentElement.classList.contains('light')
+      ? ['rgba(60,110,220,','rgba(80,140,255,','rgba(40,90,200,','rgba(100,160,240,','rgba(50,120,210,']
+      : ['rgba(80,140,255,','rgba(110,170,255,','rgba(140,200,255,','rgba(60,110,220,','rgba(180,210,255,'];
+    window._particles.forEach(p => {
+      p.color = colors[Math.floor(Math.random() * colors.length)];
+    });
+  }
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  // テーマ復元
+  try{
+    const t = localStorage.getItem('evstamp_theme');
+    if(t === 'light') document.documentElement.classList.add('light');
+  }catch(e){}
+  loadSettings();
+});
+</script>
+</body>
+</html>
