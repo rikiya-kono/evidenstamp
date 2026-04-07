@@ -213,7 +213,7 @@ html:not(.dark) .toggle-thumb{background:#555}
         <label class="chk"><input type="checkbox" id="stamp-bg" onchange="save()"> 白背景</label>
       </div>
       <div class="field" style="justify-content:flex-end">
-        <label class="chk"><input type="checkbox" id="stamp-vertical" onchange="save()"> 縦書きスタンプ</label>
+        <label class="chk"><input type="checkbox" id="stamp-vertical" onchange="applyVerticalAll();save()"> まとめて縦書き</label>
       </div>
       <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="page-num" onchange="save()"> ページ番号付与</label>
@@ -417,9 +417,9 @@ function outName(item,stamp){
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
-      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1});
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false});
     else if(/image\/(jpeg|png)/.test(f.type))
-      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1});
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false});
   }
   document.getElementById('fi').value='';
   refreshUI();
@@ -441,6 +441,15 @@ function removeFile(i){
 function toggleEda(i){
   if(i===0)return;
   files[i].isEda=!files[i].isEda;
+  resetDone();refreshList();
+}
+function applyVerticalAll(){
+  const val=c('stamp-vertical');
+  files.forEach(f=>f.isVertical=val);
+  resetDone();refreshList();
+}
+function toggleVertical(i){
+  files[i].isVertical=!files[i].isVertical;
   resetDone();refreshList();
 }
 function setEdaStart(i,val){
@@ -491,6 +500,7 @@ function refreshList(){
       </div>
       ${edaStartInput}
       <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})"${i===0?' disabled':''}>枝</button>
+      <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
       <div class="fr">${right}</div>`;
     el.addEventListener('dragstart',e=>{dragSrcIdx=i;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
     el.addEventListener('dragend',()=>{el.classList.remove('dragging');clearInsertMarkers();});
@@ -545,11 +555,11 @@ async function imageToPdf(file){
   return new File([await doc.save()],file.name.replace(/\.(jpe?g|png)$/i,'.pdf'),{type:'application/pdf'});
 }
 
-function makeStampPng(text){
+function makeStampPng(text,vertical){
   const fs=parseInt(v('stamp-size'))||14;
   const color=v('stamp-color')||'#BF3528';
   const bg=c('stamp-bg');
-  const vertical=c('stamp-vertical');
+  // vertical is passed as argument
   const pad=bg?5:0,DPR=4;
   const cv=document.createElement('canvas');
   const ctx=cv.getContext('2d');
@@ -637,7 +647,7 @@ async function stampPdf(item,text){
     doc.setKeywords([]);doc.setCreator('');doc.setProducer('');
   }
   if(c('page-num'))await addPageNumbers(doc);
-  const{bytes,w,h}=makeStampPng(text);
+  const{bytes,w,h}=makeStampPng(text,item.isVertical);
   const png=await doc.embedPng(bytes);
   const page=doc.getPages()[0];
   const{width,height}=page.getSize();
