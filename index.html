@@ -185,6 +185,9 @@ html:not(.dark) .toggle-thumb{background:#555}
           <option value="paren">括弧　(甲001)書類名</option>
         </select>
       </div>
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="rename-file" checked onchange="refreshList();save()"> ファイル名変更</label>
+      </div>
     </div>
 
     <hr class="divider">
@@ -403,6 +406,7 @@ function getStamps(){return calcStamps().map(({main,eda})=>fmtStamp(main,eda));}
 
 function outName(item,stamp){
   const orig=item.isImg?item.file.name.replace(/\.(jpe?g|png)$/i,'.pdf'):item.file.name;
+  if(!c('rename-file'))return orig;
   const sep=v('separator');
   if(sep==='kakko')return`【${stamp}】${orig}`;
   if(sep==='paren')return`(${stamp})${orig}`;
