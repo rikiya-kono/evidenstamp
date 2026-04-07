@@ -3,887 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EvidenStamp ✦</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>EvidenStamp</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --bg:#07070f;
-  --surface:rgba(255,255,255,0.04);
-  --surface2:rgba(255,255,255,0.07);
-  --border:rgba(255,255,255,0.08);
-  --border-glow:rgba(42,95,216,0.5);
-  --blue:#2A5FD8;
-  --blue-dark:#1A3FA0;
-  --blue-glow:rgba(42,95,216,0.35);
-  --silver:#B8BDC8;
-  --silver-light:#D8DCE8;
-  --text:#EDE8DF;
-  --text-dim:rgba(237,232,223,0.45);
-  --text-muted:rgba(237,232,223,0.25);
-  --done:#2ECC71;
-  --done-glow:rgba(46,204,113,0.3);
-  --bg-grad1:rgba(42,95,216,0.12);
-  --bg-grad2:rgba(184,189,200,0.08);
-  --bg-grad3:rgba(30,20,60,0.6);
-  --modal-bg:#0e0e1a;
-  --sel-opt:#1a1a2e;
-  --transition-speed:.35s;
-}
-
-html.light{
-  --bg:#faf8f3;
-  --surface:rgba(255,255,255,0.75);
-  --surface2:rgba(255,255,255,0.92);
-  --border:rgba(0,0,0,0.09);
-  --border-glow:rgba(42,95,216,0.3);
-  --blue:#2A5FD8;
-  --blue-dark:#1A3FA0;
-  --blue-glow:rgba(42,95,216,0.2);
-  --silver:#8890A8;
-  --silver-light:#B8BDC8;
-  --text:#1a1014;
-  --text-dim:rgba(26,16,20,0.55);
-  --text-muted:rgba(26,16,20,0.3);
-  --done:#1a9450;
-  --done-glow:rgba(26,148,80,0.2);
-  --bg-grad1:rgba(42,95,216,0.06);
-  --bg-grad2:rgba(184,189,200,0.05);
-  --bg-grad3:rgba(250,240,230,0.0);
-  --modal-bg:#ffffff;
-  --sel-opt:#ffffff;
-}
-
-html{scroll-behavior:smooth}
-
-body{
-  font-family:'DM Mono','Hiragino Kaku Gothic ProN','Yu Gothic',monospace;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  padding:40px 20px 80px;
-  overflow-x:hidden;
-  position:relative;
-  transition:background var(--transition-speed) ease, color var(--transition-speed) ease;
-}
-
-html.light body::before{opacity:0.015}
-html.light body::after{
-  background:
-    radial-gradient(ellipse 70% 50% at 15% 5%, var(--bg-grad1) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 85% 85%, var(--bg-grad2) 0%, transparent 60%);
-}
-
-/* ─── パーティクルキャンバス ─── */
-#sparkle-canvas{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:0;
-}
-
-/* ─── ノイズオーバーレイ ─── */
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:0.025;
-  pointer-events:none;
-  z-index:1;
-}
-
-/* ─── グロウグラデ背景 ─── */
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, var(--bg-grad1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 80% 80%, var(--bg-grad2) 0%, transparent 60%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, var(--bg-grad3) 0%, transparent 100%);
-  pointer-events:none;
-  z-index:1;
-  transition:background var(--transition-speed) ease;
-}
-
-.wrap{
-  max-width:800px;
-  margin:0 auto;
-  position:relative;
-  z-index:2;
-}
-
-/* ─── ヘッダー ─── */
-.header{
-  margin-bottom:32px;
-  animation:fadeSlideDown .7s cubic-bezier(.16,1,.3,1) both;
-}
-
-.title-row{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-bottom:6px;
-}
-
-h1{
-  font-family:'Noto Serif JP',serif;
-  font-weight:900;
-  font-size:28px;
-  background:linear-gradient(135deg, #e0e4f0 0%, #a0b0d8 20%, #2A5FD8 50%, #b8c4e0 80%, #f0f2f8 100%);
-  background-size:300% auto;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-  animation:shimmerText 4s linear infinite;
-  letter-spacing:-.02em;
-  line-height:1.1;
-}
-
-@keyframes shimmerText{
-  0%{background-position:300% center}
-  100%{background-position:0% center}
-}
-
-.crown{
-  font-size:22px;
-  animation:floatCrown 3s ease-in-out infinite;
-  display:inline-block;
-  filter:drop-shadow(0 0 8px var(--silver));
-}
-
-@keyframes floatCrown{
-  0%,100%{transform:translateY(0) rotate(-5deg)}
-  50%{transform:translateY(-4px) rotate(5deg)}
-}
-
-.help-btn{
-  width:24px;height:24px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,0.15);
-  background:var(--surface);
-  cursor:pointer;
-  font-size:12px;
-  font-weight:600;
-  color:var(--text-dim);
-  font-family:inherit;
-  flex-shrink:0;
-  line-height:1;
-  transition:all .2s;
-  backdrop-filter:blur(10px);
-}
-.help-btn:hover{
-  border-color:var(--silver);
-  color:var(--silver);
-  box-shadow:0 0 12px rgba(184,189,200,0.3);
-}
-
-.sub{
-  font-size:12px;
-  color:var(--text-dim);
-  letter-spacing:.02em;
-  font-family:'DM Mono',monospace;
-}
-
-/* ─── パネル ─── */
-.panel{
-  background:var(--surface);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:20px 22px;
-  margin-bottom:12px;
-  position:relative;
-  overflow:hidden;
-  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) both;
-  transition:border-color .3s, box-shadow .3s, background var(--transition-speed) ease;
-}
-.panel:hover{
-  border-color:rgba(255,255,255,0.13);
-  box-shadow:0 0 40px rgba(42,95,216,0.06);
-}
-html.light .panel:hover{
-  border-color:rgba(0,0,0,0.14);
-  box-shadow:0 4px 24px rgba(42,95,216,0.07), 0 1px 4px rgba(0,0,0,0.06);
-}
-.panel::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-}
-html.light .panel::before{
-  background:linear-gradient(90deg, transparent, rgba(42,95,216,0.15), transparent);
-}
-
-.panel:nth-child(2){animation-delay:.05s}
-.panel:nth-child(3){animation-delay:.1s}
-
-@keyframes fadeSlideUp{
-  from{opacity:0;transform:translateY(16px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes fadeSlideDown{
-  from{opacity:0;transform:translateY(-16px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-.ptitle{
-  font-size:9px;
-  color:var(--text-muted);
-  text-transform:uppercase;
-  letter-spacing:.15em;
-  margin-bottom:14px;
-  font-family:'DM Mono',monospace;
-}
-
-.row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
-.field{display:flex;flex-direction:column;gap:6px}
-.fl{font-size:10px;color:var(--text-dim);letter-spacing:.05em}
-
-/* ─── インプット系 ─── */
-.num-grp{
-  display:flex;align-items:center;
-  background:rgba(255,255,255,0.05);
-  border-radius:8px;padding:2px 4px;
-  border:1px solid var(--border);
-  transition:border-color .2s, box-shadow .2s;
-}
-.num-grp:focus-within{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px var(--blue-glow);
-}
-.num-grp button{
-  background:none;border:none;cursor:pointer;
-  font-size:17px;line-height:1;padding:2px 6px;
-  color:var(--text-dim);font-family:inherit;
-  transition:color .15s;
-}
-.num-grp button:hover{color:var(--silver)}
-.num-grp input{
-  width:40px;text-align:center;background:none;border:none;outline:none;
-  font-size:13px;font-weight:500;font-family:'DM Mono',monospace;color:var(--text);
-}
-
-select{
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  border-radius:8px;padding:7px 10px;
-  font-size:12px;color:var(--text);cursor:pointer;outline:none;
-  font-family:'DM Mono',monospace;
-  transition:border-color .2s, box-shadow .2s;
-  appearance:none;
-  -webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(237,232,223,0.3)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 10px center;
-  padding-right:28px;
-}
-select:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px var(--blue-glow);
-}
-select option{background:#1a1a2e;color:var(--text)}
-html.light select option{background:#ffffff;color:#1a1014}
-
-.sym-custom{
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  border-radius:8px;padding:7px 10px;
-  font-size:13px;font-family:'DM Mono',monospace;outline:none;
-  width:85px;color:var(--text);
-  transition:border-color .2s, box-shadow .2s;
-}
-.sym-custom:focus{
-  border-color:var(--silver);
-  box-shadow:0 0 0 3px rgba(184,189,200,0.2);
-}
-
-.divider{
-  border:none;border-top:1px solid var(--border);margin:16px 0;
-}
-
-input[type=number].sm{
-  width:56px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  border-radius:8px;padding:6px 8px;
-  font-size:13px;font-family:'DM Mono',monospace;outline:none;
-  color:var(--text);text-align:center;
-  transition:border-color .2s, box-shadow .2s;
-}
-input[type=number].sm:focus{
-  border-color:var(--silver);
-  box-shadow:0 0 0 3px rgba(184,189,200,0.2);
-}
-
-input[type=color]{
-  width:36px;height:32px;
-  border:1px solid var(--border);border-radius:8px;
-  cursor:pointer;padding:3px;background:rgba(255,255,255,0.05);flex-shrink:0;
-}
-
-.chk{
-  display:flex;align-items:center;gap:6px;
-  font-size:11px;color:var(--text-dim);cursor:pointer;
-  padding-bottom:4px;white-space:nowrap;
-  font-family:'DM Mono',monospace;
-  transition:color .2s;
-}
-.chk:hover{color:var(--text)}
-.chk input{
-  width:15px;height:15px;cursor:pointer;
-  accent-color:var(--blue);flex-shrink:0;
-}
-
-/* ─── ドロップゾーン ─── */
-#dropzone{
-  border:1.5px dashed rgba(255,255,255,0.15);
-  border-radius:16px;
-  padding:42px 24px;
-  text-align:center;
-  cursor:pointer;
-  margin-bottom:12px;
-  transition:all .3s;
-  background:var(--surface);
-  backdrop-filter:blur(20px);
-  position:relative;
-  overflow:hidden;
-  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .15s both;
-}
-#dropzone::before{
-  content:'';
-  position:absolute;
-  inset:-50%;
-  background:conic-gradient(
-    from var(--angle,0deg),
-    transparent 0deg,
-    var(--blue) 60deg,
-    transparent 120deg,
-    transparent 240deg,
-    var(--silver) 300deg,
-    transparent 360deg
-  );
-  opacity:0;
-  transition:opacity .4s;
-  animation:spinGlow 4s linear infinite;
-  border-radius:50%;
-  z-index:-1;
-}
-@property --angle{
-  syntax:'<angle>';
-  initial-value:0deg;
-  inherits:false;
-}
-@keyframes spinGlow{
-  to{--angle:360deg}
-}
-#dropzone:hover::before,#dropzone.over::before{opacity:.15}
-#dropzone:hover,#dropzone.over{
-  border-color:var(--blue);
-  background:rgba(42,95,216,0.05);
-  box-shadow:0 0 40px rgba(42,95,216,0.15), inset 0 0 40px rgba(42,95,216,0.04);
-  transform:translateY(-2px);
-}
-
-.dz-icon{
-  font-size:36px;
-  margin-bottom:10px;
-  display:block;
-  animation:floatIcon 3s ease-in-out infinite;
-  filter:drop-shadow(0 0 12px var(--blue-glow));
-}
-@keyframes floatIcon{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
-}
-
-.dz-t{
-  font-size:14px;font-weight:500;
-  margin-bottom:5px;
-  color:var(--text);
-  font-family:'Noto Serif JP',serif;
-}
-.dz-s{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace}
-
-/* ─── ファイルリストコンテナ ─── */
-#flc{display:none;margin-bottom:12px}
-.flc-top{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:10px;
-}
-.fh{
-  font-size:10px;color:var(--text-muted);
-  font-family:'DM Mono',monospace;letter-spacing:.05em;
-}
-.fc{
-  font-size:12px;color:var(--text-dim);
-  font-family:'DM Mono',monospace;
-}
-.fa{
-  font-size:11px;color:var(--text-muted);
-  background:none;border:none;cursor:pointer;
-  font-family:'DM Mono',monospace;
-  transition:color .2s;
-  padding:3px 8px;
-  border-radius:5px;
-}
-.fa:hover{color:var(--blue);background:rgba(42,95,216,0.1)}
-
-#fl{display:flex;flex-direction:column;gap:6px}
-
-/* ─── ファイル行 ─── */
-.file-row{
-  display:flex;align-items:center;gap:10px;
-  background:var(--surface);
-  backdrop-filter:blur(10px);
-  border:1px solid var(--border);
-  border-radius:12px;padding:10px 13px;
-  transition:all .2s, background var(--transition-speed) ease;
-  user-select:none;
-  animation:rowEnter .35s cubic-bezier(.16,1,.3,1) both;
-  position:relative;
-  overflow:hidden;
-}
-html.light .file-row:hover{
-  background:var(--surface2);
-  border-color:rgba(0,0,0,0.13);
-  box-shadow:0 2px 12px rgba(0,0,0,0.07);
-}
-.file-row::before{
-  content:'';
-  position:absolute;
-  left:0;top:0;bottom:0;
-  width:3px;
-  background:linear-gradient(180deg,var(--blue),var(--blue-dark));
-  border-radius:0 2px 2px 0;
-  opacity:0;
-  transition:opacity .2s;
-}
-.file-row:hover{
-  border-color:rgba(255,255,255,0.13);
-  background:var(--surface2);
-  transform:translateX(2px);
-}
-.file-row:hover::before{opacity:1}
-
-.file-row.done-glow{
-  border-color:rgba(46,204,113,0.2);
-  background:rgba(46,204,113,0.04);
-}
-.file-row.done-glow::before{
-  background:linear-gradient(180deg,var(--done),#27ae60);
-  opacity:1;
-}
-
-@keyframes rowEnter{
-  from{opacity:0;transform:translateX(-12px)}
-  to{opacity:1;transform:translateX(0)}
-}
-
-.file-row.drag-insert-before{border-top:2px solid var(--silver);box-shadow:0 -2px 12px rgba(184,189,200,0.3)}
-.file-row.drag-insert-after{border-bottom:2px solid var(--silver);box-shadow:0 2px 12px rgba(184,189,200,0.3)}
-.file-row.dragging{opacity:.25;transform:scale(.98)}
-
-.dh{
-  font-size:12px;color:var(--text-muted);
-  cursor:grab;flex-shrink:0;letter-spacing:1px;line-height:1;padding:0 2px;
-  transition:color .2s;
-}
-.dh:hover{color:var(--silver)}
-
-/* ─── バッジ ─── */
-.sbadge{
-  display:inline-flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg, var(--blue), var(--blue-dark));
-  color:#fff;
-  border-radius:7px;
-  font-size:10px;font-weight:700;
-  padding:3px 9px;
-  white-space:nowrap;flex-shrink:0;min-width:54px;
-  font-family:'Noto Serif JP',serif;
-  box-shadow:0 0 12px var(--blue-glow), 0 2px 4px rgba(0,0,0,0.3);
-  animation:badgePulse 3s ease-in-out infinite;
-  position:relative;
-  overflow:hidden;
-}
-.sbadge::after{
-  content:'';
-  position:absolute;
-  top:-50%;left:-60%;
-  width:40%;height:200%;
-  background:rgba(255,255,255,0.25);
-  transform:skewX(-20deg);
-  animation:badgeShimmer 3s ease-in-out infinite;
-}
-@keyframes badgeShimmer{
-  0%,70%,100%{left:-60%}
-  40%{left:160%}
-}
-@keyframes badgePulse{
-  0%,100%{box-shadow:0 0 12px var(--blue-glow), 0 2px 4px rgba(0,0,0,0.3)}
-  50%{box-shadow:0 0 20px rgba(42,95,216,0.5), 0 2px 4px rgba(0,0,0,0.3)}
-}
-.sbadge.ep{
-  background:linear-gradient(135deg, #1a3f8a, #112d70);
-  box-shadow:0 0 8px rgba(20,55,140,0.4), 0 2px 4px rgba(0,0,0,0.3);
-}
-.sbadge.ep::after{animation:none}
-
+  --bg:#F2F0EC;--bg2:#fff;--bg3:#F8F7F4;
+  --border:#CCC;--border2:#DDD;--border3:#EEE;
+  --text:#1a1a1a;--text2:#888;--text3:#999;--text4:#666;--text5:#aaa;
+  --panel-bg:#fff;
+  --dz-bg:#fff;--dz-hover:#EEF2FF;--dz-border:#C0BDB8;--dz-border-hover:#5080cc;
+  --btn-bg:#1a1a1a;--btn-text:#fff;--btn-hover:#333;
+  --sbtn-bg:#fff;--sbtn-text:#1a1a1a;--sbtn-hover:#F0EDE8;
+  --pb-bg:#E8E5E0;--pb-fill:#1a1a1a;
+  --done:#2a7d46;--err:#BF3528;--proc:#666;--wait:#bbb;--img:#999;
+  --ins-line:#5080cc;--ins-bg:#EEF2FF;
+}
+html.dark{
+  --bg:#111118;--bg2:#1c1c26;--bg3:#252532;
+  --border:#3a3a50;--border2:#2e2e3e;--border3:#242434;
+  --text:#E8E4DC;--text2:#888;--text3:#666;--text4:#aaa;--text5:#555;
+  --panel-bg:#1c1c26;
+  --dz-bg:#1c1c26;--dz-hover:#1e2240;--dz-border:#3a3a50;--dz-border-hover:#5080cc;
+  --btn-bg:#E8E4DC;--btn-text:#111118;--btn-hover:#ccc;
+  --sbtn-bg:#1c1c26;--sbtn-text:#E8E4DC;--sbtn-hover:#2e2e3e;
+  --pb-bg:#2e2e3e;--pb-fill:#E8E4DC;
+  --done:#3aad5e;--err:#e05545;--proc:#aaa;--wait:#444;--img:#666;
+  --ins-line:#5080cc;--ins-bg:#1e2240;
+}
+body{font-family:system-ui,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:32px 20px;transition:background .25s,color .25s}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:var(--text4);margin-bottom:1.2rem}
+.panel{background:var(--panel-bg);border:.5px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:background .25s,border-color .25s}
+.ptitle{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:11px;color:var(--text2)}
+.num-grp{display:flex;align-items:center;background:var(--bg3);border-radius:7px;padding:2px 4px;border:.5px solid var(--border);transition:background .25s}
+.num-grp button{background:none;border:none;cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;color:var(--text2);font-family:inherit}
+.num-grp input{width:40px;text-align:center;background:none;border:none;outline:none;font-size:14px;font-weight:500;font-family:inherit;color:var(--text)}
+select{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);cursor:pointer;outline:none;font-family:inherit;transition:background .25s,border-color .25s}
+.sym-custom{border:.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;width:80px;color:var(--text);background:var(--bg3);transition:background .25s}
+.sym-custom:focus{border-color:#999}
+.divider{border:none;border-top:.5px solid var(--border3);margin:12px 0}
+input[type=number].sm{width:52px;background:var(--bg3);border:.5px solid var(--border);border-radius:6px;padding:5px 7px;font-size:13px;font-family:inherit;outline:none;color:var(--text);text-align:center;transition:background .25s}
+input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;background:var(--bg3);flex-shrink:0}
+.chk{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text4);cursor:pointer;padding-bottom:4px;white-space:nowrap}
+.chk input{width:14px;height:14px;cursor:pointer;accent-color:#1a1a1a;flex-shrink:0}
+#dropzone{border:1.5px dashed var(--dz-border);border-radius:10px;padding:30px 24px;text-align:center;cursor:pointer;margin-bottom:10px;transition:background .15s,border-color .25s;background:var(--dz-bg)}
+#dropzone:hover,#dropzone.over{background:var(--dz-hover);border-color:var(--dz-border-hover)}
+.dz-t{font-size:14px;font-weight:500;margin-bottom:4px}
+.dz-s{font-size:12px;color:var(--text3)}
+#flc{display:none;margin-bottom:10px}
+.flc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.fh{font-size:11px;color:var(--text5)}
+.fc{font-size:12px;color:var(--text3)}
+.fa{font-size:12px;color:var(--text2);background:none;border:none;cursor:pointer;font-family:inherit}
+#fl{display:flex;flex-direction:column;gap:5px}
+.file-row{display:flex;align-items:center;gap:8px;background:var(--panel-bg);border:.5px solid var(--border2);border-radius:8px;padding:8px 10px;transition:border-color .15s,opacity .15s,background .25s;user-select:none}
+.file-row.drag-insert-before{border-top:2px solid #5080cc}
+.file-row.drag-insert-after{border-bottom:2px solid #5080cc}
+.file-row.dragging{opacity:.35}
+.dh{font-size:13px;color:var(--text5);cursor:grab;flex-shrink:0;letter-spacing:1px;line-height:1;padding:0 2px}
+.sbadge{display:inline-flex;align-items:center;justify-content:center;background:#BF3528;color:#fff;border-radius:5px;font-size:11px;font-weight:500;padding:2px 7px;white-space:nowrap;flex-shrink:0;min-width:48px}
+.sbadge.ep{background:#7a2018}
 .fi-wrap{flex:1;min-width:0}
-.fi-orig{
-  font-size:10px;color:var(--text-muted);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-family:'DM Mono',monospace;
-}
-.fi-new{
-  font-size:11px;font-weight:500;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  color:var(--text);font-family:'DM Mono',monospace;
-}
+.fi-orig{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-new{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eb{background:none;border:.5px solid var(--border);border-radius:4px;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;color:var(--text2);padding:2px 5px;transition:all .12s;flex-shrink:0}
+.eb.active{background:#7a2018;border-color:#7a2018;color:#fff}
+.eb:disabled{opacity:.2;cursor:not-allowed}
+.fr{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.fr button.rm{background:none;border:none;cursor:pointer;font-size:14px;color:var(--text5);padding:0;line-height:1;font-family:inherit}
+.fr a{font-size:12px;font-weight:500;color:#1d6eb5;text-decoration:none}
+.sw{font-size:11px;color:var(--wait)}
+.si{font-size:11px;color:var(--img)}
+.sp{font-size:11px;color:var(--proc)}
+.sd{font-size:11px;color:var(--done)}
+.se{font-size:11px;color:var(--err)}
+#pw{display:none;margin-bottom:10px}
+#pt{font-size:12px;color:#888;margin-bottom:5px}
+.pb-wrap{background:var(--pb-bg);border-radius:100px;height:3px;overflow:hidden}
+#pb{height:100%;background:var(--pb-fill);border-radius:100px;transition:width .3s;width:0%}
+#aw{gap:8px;display:none}
+#aw button{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;border:.5px solid var(--border);background:var(--btn-bg);color:var(--btn-text);transition:all .15s}
+#aw button:hover:not(:disabled){background:var(--btn-hover)}
+#aw button:disabled{opacity:.4;cursor:not-allowed}
+#zbtn{background:var(--sbtn-bg)!important;color:var(--sbtn-text)!important}
+#zbtn:hover:not(:disabled){background:var(--sbtn-hover)!important}
+.note{font-size:11px;color:var(--text5);text-align:center;margin-top:1.2rem;line-height:1.7}
 
-/* ─── 枝ボタン ─── */
-.eb{
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  border-radius:6px;cursor:pointer;
-  font-size:10px;font-weight:500;
-  font-family:'DM Mono',monospace;
-  color:var(--text-dim);padding:3px 7px;
-  transition:all .15s;flex-shrink:0;
-}
-.eb:hover:not(:disabled){
-  border-color:var(--silver);
-  color:var(--silver);
-  box-shadow:0 0 8px rgba(184,189,200,0.2);
-}
-.eb.active{
-  background:linear-gradient(135deg,#1a3f8a,#112d70);
-  border-color:#1a3f8a;color:#fff;
-  box-shadow:0 0 8px rgba(20,55,140,0.4);
-}
-.eb:disabled{opacity:.15;cursor:not-allowed}
-
-.fr{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.fr button.rm{
-  background:none;border:none;cursor:pointer;
-  font-size:14px;color:var(--text-muted);
-  padding:0;line-height:1;font-family:inherit;
-  transition:color .15s;
-}
-.fr button.rm:hover{color:var(--blue)}
-
-.fr a{
-  font-size:11px;font-weight:600;
-  color:var(--silver);text-decoration:none;
-  font-family:'DM Mono',monospace;
-  padding:3px 9px;
-  border:1px solid rgba(184,189,200,0.3);
-  border-radius:6px;
-  background:rgba(184,189,200,0.08);
-  transition:all .15s;
-}
-.fr a:hover{
-  background:rgba(184,189,200,0.18);
-  box-shadow:0 0 12px rgba(184,189,200,0.2);
-}
-
-/* ─── ステータステキスト ─── */
-.sw{font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace}
-.si{font-size:10px;color:rgba(184,189,200,0.7);font-family:'DM Mono',monospace}
-.sp{
-  font-size:10px;color:var(--text-dim);
-  font-family:'DM Mono',monospace;
-  animation:processing .8s ease-in-out infinite alternate;
-}
-@keyframes processing{
-  from{opacity:.4}
-  to{opacity:1}
-}
-.sd{
-  font-size:10px;color:var(--done);
-  font-family:'DM Mono',monospace;
-  text-shadow:0 0 8px var(--done-glow);
-  animation:donePulse 2s ease-in-out infinite;
-}
-@keyframes donePulse{
-  0%,100%{text-shadow:0 0 8px var(--done-glow)}
-  50%{text-shadow:0 0 16px rgba(46,204,113,0.6)}
-}
-.se{font-size:10px;color:var(--blue);font-family:'DM Mono',monospace}
-
-/* ─── プログレスバー ─── */
-#pw{display:none;margin-bottom:12px}
-#pt{
-  font-size:11px;color:var(--text-dim);
-  margin-bottom:8px;
-  font-family:'DM Mono',monospace;
-}
-.pb-wrap{
-  background:rgba(255,255,255,0.05);
-  border-radius:100px;height:4px;overflow:hidden;
-  border:1px solid var(--border);
-}
-#pb{
-  height:100%;
-  background:linear-gradient(90deg, var(--blue), #6fa3ff, var(--blue));
-  background-size:200% auto;
-  border-radius:100px;
-  transition:width .4s cubic-bezier(.16,1,.3,1);
-  width:0%;
-  animation:progressGlow 1.5s linear infinite;
-  box-shadow:0 0 8px var(--blue-glow);
-}
-@keyframes progressGlow{
-  0%{background-position:0% center;box-shadow:0 0 8px var(--blue-glow)}
-  50%{background-position:100% center;box-shadow:0 0 16px rgba(42,95,216,0.5)}
-  100%{background-position:200% center;box-shadow:0 0 8px var(--blue-glow)}
-}
-
-/* ─── アクションボタン ─── */
-#aw{gap:10px;display:none;animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .2s both}
-#aw button{
-  padding:13px 24px;
-  border-radius:10px;
-  font-size:13px;font-weight:600;
-  cursor:pointer;
-  font-family:'Noto Serif JP',serif;
-  border:1px solid rgba(42,95,216,0.4);
-  background:linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
-  color:#fff;
-  transition:all .2s;
-  position:relative;overflow:hidden;
-  box-shadow:0 0 20px var(--blue-glow), 0 4px 12px rgba(0,0,0,0.3);
-}
-#aw button::before{
-  content:'';
-  position:absolute;
-  top:-50%;left:-60%;
-  width:40%;height:200%;
-  background:rgba(255,255,255,0.2);
-  transform:skewX(-20deg);
-  transition:left .5s;
-}
-#aw button:hover:not(:disabled)::before{left:160%}
-#aw button:hover:not(:disabled){
-  transform:translateY(-2px);
-  box-shadow:0 0 32px rgba(42,95,216,0.5), 0 8px 24px rgba(0,0,0,0.3);
-}
-#aw button:active:not(:disabled){transform:translateY(0)}
-#aw button:disabled{opacity:.3;cursor:not-allowed;transform:none}
-
-#zbtn{
-  background:rgba(184,189,200,0.1)!important;
-  border-color:rgba(184,189,200,0.4)!important;
-  color:var(--silver)!important;
-  box-shadow:0 0 20px rgba(184,189,200,0.15), 0 4px 12px rgba(0,0,0,0.3)!important;
-}
-#zbtn:hover:not(:disabled){
-  background:rgba(184,189,200,0.18)!important;
-  box-shadow:0 0 32px rgba(184,189,200,0.3), 0 8px 24px rgba(0,0,0,0.3)!important;
-}
-
-/* ─── フッターノート ─── */
-.note{
-  font-size:10px;color:var(--text-muted);
-  text-align:center;margin-top:32px;line-height:2;
-  font-family:'DM Mono',monospace;
-  animation:fadeSlideUp .5s cubic-bezier(.16,1,.3,1) .3s both;
-}
-.note span{
-  display:inline-block;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:8px 16px;
-}
-
-/* ─── ヘルプモーダル ─── */
-#help-modal{
-  display:none;
-  position:fixed;inset:0;
-  background:rgba(0,0,0,0.7);
-  backdrop-filter:blur(8px);
-  z-index:100;
-  align-items:center;justify-content:center;padding:20px;
-}
-.modal-inner{
-  background:#0e0e1a;
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:16px;
-  max-width:640px;width:100%;
-  max-height:88vh;overflow-y:auto;
-  padding:32px;position:relative;
-  box-shadow:0 0 60px rgba(42,95,216,0.15), 0 40px 80px rgba(0,0,0,0.5);
-  transition:background var(--transition-speed) ease;
-}
-html.light .modal-inner{
-  background:#ffffff;
-  border-color:rgba(0,0,0,0.1);
-  box-shadow:0 0 40px rgba(42,95,216,0.08), 0 20px 60px rgba(0,0,0,0.15);
-}
-.modal-close{
-  position:absolute;top:18px;right:18px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  cursor:pointer;font-size:16px;
-  color:var(--text-muted);line-height:1;
-  font-family:inherit;
-  border-radius:8px;
-  width:32px;height:32px;
-  transition:all .2s;
-}
-.modal-close:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
-.modal-h{
-  font-size:18px;font-weight:700;margin-bottom:4px;
-  font-family:'Noto Serif JP',serif;
-  background:linear-gradient(135deg, #d8dce8, #2A5FD8);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.modal-sub{font-size:11px;color:var(--text-muted);margin-bottom:24px;font-family:'DM Mono',monospace}
-.modal-section{margin-bottom:22px}
-.modal-section-title{
-  font-size:9px;font-weight:600;color:var(--text-muted);
-  text-transform:uppercase;letter-spacing:.15em;
-  margin-bottom:10px;font-family:'DM Mono',monospace;
-}
-.modal-section ol{
-  font-size:12px;line-height:2.1;padding-left:1.4em;
-  color:var(--text-dim);font-family:'DM Mono',monospace;
-}
-.modal-section table{
-  font-size:12px;width:100%;border-collapse:collapse;
-  font-family:'DM Mono',monospace;
-}
-.modal-section td{
-  padding:7px 0;color:var(--text-dim);line-height:1.7;
-  border-top:1px solid var(--border);
-}
-.modal-section td:first-child{
-  padding-right:14px;color:var(--text);font-weight:500;
-  white-space:nowrap;vertical-align:top;
-}
-.modal-code{
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);
-  border-radius:8px;padding:12px 16px;
-  font-size:11px;line-height:2.2;
-  color:var(--text-dim);font-family:'DM Mono',monospace;
-}
-.modal-code b{color:var(--silver)}
-
-/* ─── スパークルバースト ─── */
-.sparkle-burst{
-  position:fixed;pointer-events:none;z-index:999;
-}
-
-/* ─── スクロールバー ─── */
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
-
-/* ─── 枝番入力 ─── */
-.eda-start-input{
-  width:34px;font-size:10px;text-align:center;
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);border-radius:5px;
-  padding:3px;font-family:'DM Mono',monospace;color:var(--text);
-  outline:none;
-}
-.eda-start-input:focus{border-color:var(--silver)}
-
-/* ─── モード切り替えトグル ─── */
-.mode-toggle{
-  display:flex;align-items:center;gap:8px;
-  margin-left:auto;
-  flex-shrink:0;
-}
-.mode-toggle-label{
-  font-size:10px;color:var(--text-muted);
-  font-family:'DM Mono',monospace;
-  transition:color var(--transition-speed) ease;
-  letter-spacing:.05em;
-  user-select:none;
-}
+/* ─── ダーク/ライトトグル ─── */
+.mode-toggle{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
+.toggle-icon{font-size:13px;line-height:1;transition:opacity .25s}
+html.dark .toggle-icon.dark-icon{opacity:1}
+html.dark .toggle-icon.light-icon{opacity:.3}
+html:not(.dark) .toggle-icon.dark-icon{opacity:.3}
+html:not(.dark) .toggle-icon.light-icon{opacity:1}
 .toggle-track{
-  width:44px;height:24px;
-  border-radius:100px;
-  background:rgba(255,255,255,0.1);
-  border:1px solid var(--border);
-  cursor:pointer;
-  position:relative;
-  transition:background var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow .2s;
+  width:40px;height:22px;border-radius:100px;
+  background:var(--border2);border:.5px solid var(--border);
+  cursor:pointer;position:relative;
+  transition:background .25s,border-color .25s;
   flex-shrink:0;
 }
-.toggle-track:hover{
-  box-shadow:0 0 12px var(--blue-glow);
-  border-color:var(--blue);
-}
-html.light .toggle-track{
-  background:rgba(42,95,216,0.1);
-}
-html.light .toggle-track:hover{
-  box-shadow:0 0 12px var(--blue-glow);
-}
+html.dark .toggle-track{background:#3a3a50;border-color:#4a4a65}
 .toggle-thumb{
-  position:absolute;
-  top:3px;left:3px;
-  width:16px;height:16px;
-  border-radius:50%;
-  background:linear-gradient(135deg, var(--text-dim), var(--text-muted));
-  transition:transform var(--transition-speed) cubic-bezier(.34,1.56,.64,1), background var(--transition-speed) ease;
-  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+  position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;
+  background:#888;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .25s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
 }
-html.light .toggle-thumb{
-  transform:translateX(20px);
-  background:linear-gradient(135deg, var(--blue), var(--blue-dark));
-  box-shadow:0 0 8px var(--blue-glow), 0 1px 4px rgba(0,0,0,0.2);
-}
-.toggle-icon{
-  font-size:13px;
-  transition:transform .3s ease, opacity .3s ease;
-  line-height:1;
-}
-html.light .toggle-icon.dark-icon{opacity:.4}
-html.light .toggle-icon.light-icon{opacity:1;filter:drop-shadow(0 0 4px rgba(184,189,200,0.6))}
-html:not(.light) .toggle-icon.dark-icon{opacity:1}
-html:not(.light) .toggle-icon.light-icon{opacity:.35}
+html.dark .toggle-thumb{transform:translateX(18px);background:var(--text)}
+html:not(.dark) .toggle-thumb{background:#555}
 </style>
 </head>
 <body>
-
-<canvas id="sparkle-canvas"></canvas>
-
 <div class="wrap">
-  <div class="header">
-    <div class="title-row">
-      <span class="crown">⚖</span>
-      <h1>EvidenStamp</h1>
-      <button class="help-btn" onclick="document.getElementById('help-modal').style.display='flex'">?</button>
-      <div class="mode-toggle">
-        <span class="toggle-icon dark-icon">🌙</span>
-        <div class="toggle-track" onclick="toggleMode()" title="ダーク/ライト切り替え">
-          <div class="toggle-thumb" id="toggle-thumb"></div>
-        </div>
-        <span class="toggle-icon light-icon">☀️</span>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <h1>EvidenStamp</h1>
+    <button onclick="document.getElementById('help-modal').style.display='flex'" id="help-btn" style="width:22px;height:22px;border-radius:50%;border:.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;flex-shrink:0;line-height:1">?</button>
+    <div class="mode-toggle">
+      <span class="toggle-icon light-icon">☀️</span>
+      <div class="toggle-track" onclick="toggleDark()" title="ダーク/ライト切り替え">
+        <div class="toggle-thumb"></div>
       </div>
+      <span class="toggle-icon dark-icon">🌙</span>
     </div>
-    <p class="sub">PDFに証拠番号スタンプを自動付与・ファイル名変更 &nbsp;·&nbsp; すべてブラウザ内で完結</p>
   </div>
+  <p class="sub">PDFに証拠番号スタンプを自動付与・ファイル名変更。すべてブラウザ内で完結。</p>
 
   <div class="panel">
     <div class="ptitle">基本設定</div>
     <div class="row">
       <div class="field">
         <div class="fl">符号</div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center">
           <select id="sym-sel" onchange="onSymSel();save()">
             <option value="甲">甲</option>
             <option value="乙">乙</option>
@@ -907,6 +165,7 @@ html:not(.light) .toggle-icon.light-icon{opacity:.35}
           <button onclick="adj(1)">+</button>
         </div>
       </div>
+
       <div class="field">
         <div class="fl">番号スタイル</div>
         <select id="num-style" onchange="refreshList();save()">
@@ -929,7 +188,7 @@ html:not(.light) .toggle-icon.light-icon{opacity:.35}
     </div>
 
     <hr class="divider">
-    <div class="ptitle" style="margin-bottom:10px">スタンプ設定</div>
+    <div class="ptitle" style="margin-bottom:8px">スタンプ設定</div>
     <div class="row">
       <div class="field">
         <div class="fl">フォントサイズ (px)</div>
@@ -956,7 +215,7 @@ html:not(.light) .toggle-icon.light-icon{opacity:.35}
     </div>
 
     <hr class="divider">
-    <div class="ptitle" style="margin-bottom:10px">出力設定</div>
+    <div class="ptitle" style="margin-bottom:8px">出力設定</div>
     <div class="row">
       <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="del-meta" onchange="save()"> メタデータ削除</label>
@@ -969,9 +228,8 @@ html:not(.light) .toggle-icon.light-icon{opacity:.35}
 
   <div id="dropzone" onclick="document.getElementById('fi').click()">
     <input type="file" id="fi" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none" onchange="handleFiles(this.files)">
-    <span class="dz-icon">📄</span>
     <div class="dz-t">PDFをドロップ、またはクリックして選択</div>
-    <div class="dz-s">PDF · JPG · PNG &nbsp;対応 &nbsp;·&nbsp; 複数ファイル可 &nbsp;·&nbsp; 外部送信なし</div>
+    <div class="dz-s">PDF・JPG・PNG 対応 · 複数ファイル可 · すべてブラウザ内で完結（外部送信なし）</div>
   </div>
 
   <div id="flc">
@@ -989,202 +247,77 @@ html:not(.light) .toggle-icon.light-icon{opacity:.35}
   </div>
 
   <div id="aw">
-    <button id="pbtn" onclick="processAll()" style="flex:1">✦ スタンプを付与する</button>
+    <button id="pbtn" onclick="processAll()" style="flex:1">スタンプを付与する</button>
     <button id="zbtn" onclick="downloadZip()">ZIP でまとめてDL</button>
   </div>
 
-  <p class="note"><span>🔒 すべての処理はブラウザ内で完結。PDFは外部サーバーに送信されません。<br>設定はブラウザに自動保存されます。</span></p>
+  <p class="note">🔒 すべての処理はブラウザ内で完結。PDFは外部サーバーに送信されません。<br>設定はブラウザに自動保存されます。</p>
 </div>
 
 <!-- ヘルプモーダル -->
-<div id="help-modal" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal-inner">
-    <button class="modal-close" onclick="document.getElementById('help-modal').style.display='none'">×</button>
-    <div class="modal-h">EvidenStamp 使い方</div>
-    <p class="modal-sub">すべての処理はブラウザ内で完結。PDFは外部に送信されません。</p>
+<div id="help-modal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:12px;max-width:620px;width:100%;max-height:88vh;overflow-y:auto;padding:28px 32px;position:relative">
+    <button onclick="document.getElementById('help-modal').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;font-size:20px;color:#999;line-height:1;font-family:inherit">×</button>
+    <h2 style="font-size:17px;font-weight:600;margin-bottom:4px">EvidenStamp 使い方</h2>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px">すべての処理はブラウザ内で完結。PDFは外部に送信されません。</p>
 
-    <div style="display:flex;flex-direction:column;gap:20px">
-      <div class="modal-section">
-        <div class="modal-section-title">基本的な使い方</div>
-        <ol>
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <section>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本的な使い方</div>
+        <ol style="font-size:13px;line-height:1.9;padding-left:1.4em;color:#333">
           <li>設定パネルで符号・番号スタイル・区切り文字などを設定</li>
           <li>PDFをドロップゾーンにドラッグ＆ドロップ（またはクリックして選択）</li>
           <li>必要に応じてファイルの並び替え・枝番設定</li>
           <li>「スタンプを付与する」をクリック</li>
           <li>各行の「DL」で個別保存、または「ZIP でまとめてDL」で一括保存</li>
         </ol>
-      </div>
+      </section>
 
-      <div class="modal-section">
-        <div class="modal-section-title">基本設定</div>
-        <table>
-          <tr><td>符号</td><td>甲〜疎乙の9種類から選択。「カスタム...」で任意の文字列（例：別紙）も入力可能。</td></tr>
-          <tr><td>番号スタイル</td><td>mints形式（甲001）、正式（甲第1号証）、号証、ハイフン、シンプルの5種類。枝番のセパレータも自動で切り替わります。</td></tr>
-          <tr><td>区切り文字</td><td>ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
+      <section>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
+        <table style="font-size:13px;width:100%;border-collapse:collapse">
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲〜疎乙の9種類から選択。「カスタム...」で任意の文字列（例：別紙）も入力可能。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">番号スタイル</td><td style="padding:5px 0;color:var(--text);line-height:1.6">mints形式（甲001）、正式（甲第1号証）、号証、ハイフン、シンプルの5種類。枝番のセパレータも自動で切り替わります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
         </table>
-      </div>
+      </section>
 
-      <div class="modal-section">
-        <div class="modal-section-title">枝番の使い方</div>
-        <p style="font-size:12px;line-height:1.9;color:var(--text-dim);margin-bottom:10px;font-family:'DM Mono',monospace">ファイル行右側の「枝」ボタンをオンにすると、そのファイルを直前のグループの枝番として扱います。先頭ファイルは枝番にできません。</p>
-        <div class="modal-code">
+      <section>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">枝番の使い方</div>
+        <p style="font-size:13px;line-height:1.8;color:#333;margin-bottom:8px">ファイル行右側の「枝」ボタンをオンにすると、そのファイルを直前のグループの枝番として扱います。先頭ファイルは枝番にできません。</p>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;line-height:2;color:#555;font-family:monospace">
           メール本文.pdf　→　<b>甲第2号証の1</b>　（次が枝なので自動での1になる）<br>
           添付PDF1.pdf　[枝]　→　<b>甲第2号証の2</b><br>
           添付PDF2.pdf　[枝]　→　<b>甲第2号証の3</b>
         </div>
-      </div>
+        <p style="font-size:13px;line-height:1.8;color:#333;margin-top:8px">親の行に表示される「の <input readonly style="width:28px;text-align:center;font-size:11px;border:.5px solid #CCC;border-radius:3px;padding:1px">」入力でグループごとに枝番の開始番号を設定できます（既存の枝番の続きから付け足す場合などに使用）。</p>
+      </section>
 
-      <div class="modal-section">
-        <div class="modal-section-title">その他の機能</div>
-        <table>
-          <tr><td>並び替え</td><td>各行左端の「⠿⠿」をドラッグして順序を変更できます。並び替え後は再付与が必要です。</td></tr>
-          <tr><td>再付与</td><td>「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
-          <tr><td>JPG・PNG</td><td>画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
-          <tr><td>白背景</td><td>スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
-          <tr><td>ページ番号付与</td><td>各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
-          <tr><td>枝番グループを結合</td><td>ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
-          <tr><td>メタデータ削除</td><td>出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
-          <tr><td>設定の保存</td><td>符号・スタイル・スタンプ設定などはブラウザに自動保存され、次回起動時に復元されます。</td></tr>
+      <section>
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">その他の機能</div>
+        <table style="font-size:13px;width:100%;border-collapse:collapse">
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「⠿⠿」をドラッグして順序を変更できます。並び替え後は再付与が必要です。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">再付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">JPG・PNG</td><td style="padding:5px 0;color:var(--text);line-height:1.6">画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">白背景</td><td style="padding:5px 0;color:var(--text);line-height:1.6">スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ページ番号付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">枝番グループを結合</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">メタデータ削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">設定の保存</td><td style="padding:5px 0;color:var(--text);line-height:1.6">符号・スタイル・スタンプ設定などはブラウザに自動保存され、次回起動時に復元されます。</td></tr>
         </table>
-      </div>
+      </section>
+
     </div>
   </div>
 </div>
 
 <script>
-/* ─── パーティクルシステム ─── */
-(function(){
-  const canvas = document.getElementById('sparkle-canvas');
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-
-  function resize(){
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  const DARK_COLORS = [
-    'rgba(80,140,255,',
-    'rgba(110,170,255,',
-    'rgba(140,200,255,',
-    'rgba(60,110,220,',
-    'rgba(180,210,255,',
-  ];
-  const LIGHT_COLORS = [
-    'rgba(60,110,220,',
-    'rgba(80,140,255,',
-    'rgba(40,90,200,',
-    'rgba(100,160,240,',
-    'rgba(50,120,210,',
-  ];
-  function getColors(){ return document.documentElement.classList.contains('light') ? DARK_COLORS : LIGHT_COLORS; }
-
-  class Particle {
-    constructor(){this.reset(true)}
-    reset(init){
-      this.x = Math.random() * W;
-      this.y = init ? Math.random() * H : H + 10;
-      this.size = Math.random() * 2.5 + 0.5;
-      this.speedY = -(Math.random() * 0.4 + 0.1);
-      this.speedX = (Math.random() - 0.5) * 0.2;
-      this.opacity = 0;
-      this.maxOp = Math.random() * 0.5 + 0.1;
-      this.color = getColors()[Math.floor(Math.random() * DARK_COLORS.length)];
-      this.life = 0;
-      this.maxLife = Math.random() * 400 + 200;
-      this.twinkle = Math.random() * Math.PI * 2;
-      this.twinkleSpeed = Math.random() * 0.05 + 0.01;
-    }
-    update(){
-      this.life++;
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.twinkle += this.twinkleSpeed;
-      const progress = this.life / this.maxLife;
-      if(progress < 0.2) this.opacity = (progress / 0.2) * this.maxOp;
-      else if(progress > 0.8) this.opacity = ((1 - progress) / 0.2) * this.maxOp;
-      else this.opacity = this.maxOp;
-      this.opacity *= (0.6 + Math.sin(this.twinkle) * 0.4);
-      if(this.life >= this.maxLife || this.y < -10) this.reset(false);
-    }
-    draw(){
-      ctx.save();
-      ctx.globalAlpha = this.opacity;
-      // 四芒星スパークル
-      const s = this.size;
-      ctx.fillStyle = this.color + '1)';
-      ctx.shadowColor = this.color + '0.8)';
-      ctx.shadowBlur = s * 4;
-      ctx.beginPath();
-      const arms = 4;
-      for(let i = 0; i < arms * 2; i++){
-        const angle = (i * Math.PI) / arms + this.twinkle * 0.3;
-        const r = i % 2 === 0 ? s * 2 : s * 0.4;
-        i === 0 ? ctx.moveTo(this.x + Math.cos(angle) * r, this.y + Math.sin(angle) * r)
-                : ctx.lineTo(this.x + Math.cos(angle) * r, this.y + Math.sin(angle) * r);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  for(let i = 0; i < 60; i++) particles.push(new Particle());
-  window._particles = particles;
-
-  function loop(){
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {p.update(); p.draw();});
-    requestAnimationFrame(loop);
-  }
-  loop();
-
-  // ファイル完了時のバーストエフェクト
-  window.burstAt = function(x, y){
-    const burst = [];
-    for(let i = 0; i < 12; i++){
-      const angle = (i / 12) * Math.PI * 2;
-      const speed = Math.random() * 3 + 1;
-      burst.push({
-        x, y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size: Math.random() * 3 + 1,
-        opacity: 1,
-        color: getColors()[Math.floor(Math.random() * DARK_COLORS.length)],
-        life: 0
-      });
-    }
-    function animBurst(){
-      burst.forEach(p => {
-        p.life++;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.1;
-        p.opacity = Math.max(0, 1 - p.life / 40);
-        ctx.save();
-        ctx.globalAlpha = p.opacity;
-        ctx.fillStyle = p.color + '1)';
-        ctx.shadowColor = p.color + '0.8)';
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
-      if(burst.some(p => p.life < 40)) requestAnimationFrame(animBurst);
-    }
-    animBurst();
-  };
-})();
-
-/* ─── アプリロジック（元のコードそのまま） ─── */
 let files=[], dragSrcIdx=null;
 function clearInsertMarkers(){document.querySelectorAll('.file-row').forEach(r=>{r.classList.remove('drag-insert-before','drag-insert-after');delete r.dataset.insertBefore;});}
-const SK='evstamp_settings';
+const SK='koc2_settings';
 
+/* ── 設定保存・復元 ── */
 function save(){
   try{
     localStorage.setItem(SK,JSON.stringify({
@@ -1215,6 +348,7 @@ function loadSettings(){
 function v(id){return document.getElementById(id)?.value;}
 function c(id){return document.getElementById(id)?.checked;}
 
+/* ── 符号 ── */
 function getSym(){
   return v('sym-sel')==='__c__'?(v('csym')||'甲'):v('sym-sel');
 }
@@ -1230,6 +364,7 @@ function adj(d){
   refreshList();save();
 }
 
+/* ── 付番ロジック ── */
 function calcStamps(){
   const start=parseInt(v('start-num')||'1');
   let main=start-1, curEdaStart=1;
@@ -1270,6 +405,7 @@ function outName(item,stamp){
   return`${stamp}${sep==='space'?' ':'_'}${orig}`;
 }
 
+/* ── ファイル管理 ── */
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
@@ -1333,12 +469,11 @@ function refreshList(){
     if(item.status==='pending')right=`<span class="sw">待機中</span><button class="rm" onclick="removeFile(${i})">×</button>`;
     else if(item.status==='img')right=`<span class="si">画像→PDF</span><button class="rm" onclick="removeFile(${i})">×</button>`;
     else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
-    else if(item.status==='done')right=`<span class="sd">✦完了</span><a href="${item.url}" download="${nn}">DL</a>`;
+    else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
     else right=`<span class="se">エラー</span><button class="rm" onclick="removeFile(${i})">×</button>`;
-    const edaStartInput=isEP?`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0"><span style="font-size:10px;color:var(--text-muted)">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" class="eda-start-input" title="枝番開始番号"></div>`:'';
+    const edaStartInput=isEP?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
-    el.className='file-row'+(item.status==='done'?' done-glow':'');
-    el.draggable=true;el.dataset.idx=i;
+    el.className='file-row';el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
       <span class="dh">⠿⠿</span>
       <span class="sbadge${item.isEda||isEP?' ep':''}">${stamp}</span>
@@ -1367,6 +502,7 @@ function refreshList(){
       let dst=parseInt(el.dataset.idx);
       if(src===null||src===dst)return;
       const[moved]=files.splice(src,1);
+      // srcを抜いた後のdstを補正
       if(src<dst)dst--;
       const insertAt=insertBefore?dst:dst+1;
       files.splice(insertAt,0,moved);
@@ -1378,7 +514,7 @@ function refreshList(){
   document.getElementById('zbtn').disabled=!files.length||!files.every(f=>f.status==='done');
 }
 
-/* ─── ドロップゾーン ─── */
+/* ── ドロップゾーン ── */
 const dz=document.getElementById('dropzone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
@@ -1388,7 +524,7 @@ dz.addEventListener('drop',e=>{
   if(valid.length)handleFiles(valid);
 });
 
-/* ─── PDF処理 ─── */
+/* ── PDF処理 ── */
 async function imageToPdf(file){
   const doc=await PDFLib.PDFDocument.create();
   const bytes=await file.arrayBuffer();
@@ -1454,8 +590,10 @@ async function stampPdf(item,text){
   return new Blob([await doc.save()],{type:'application/pdf'});
 }
 
+/* ── 処理 ── */
 async function processAll(){
   if(!files.length)return;
+  // 常に全ファイルをリセットして再付与
   resetDone();
   const btn=document.getElementById('pbtn');btn.disabled=true;btn.textContent='処理中...';
   document.getElementById('pw').style.display='block';
@@ -1470,20 +608,15 @@ async function processAll(){
       const blob=await stampPdf(item,stamps[i]);
       if(item.url)URL.revokeObjectURL(item.url);
       item.blob=blob;item.url=URL.createObjectURL(blob);item.status='done';
-      // 完了バースト
-      const rows=document.querySelectorAll('.file-row');
-      if(rows[i]){
-        const rect=rows[i].getBoundingClientRect();
-        window.burstAt(rect.right - 40, rect.top + rect.height / 2);
-      }
     }catch(e){console.error(e);item.status='error';}
     done++;document.getElementById('pb').style.width=`${done/files.length*100}%`;
     refreshList();
   }
-  document.getElementById('pt').textContent=`✦ 完了 — ${done} ファイル処理しました`;
-  btn.disabled=false;btn.textContent='✦ スタンプを付与する';
+  document.getElementById('pt').textContent=`完了 — ${done} ファイル処理しました`;
+  btn.disabled=false;btn.textContent='スタンプを付与する';
 }
 
+/* ── ZIP出力 ── */
 async function downloadZip(){
   const zb=document.getElementById('zbtn');zb.disabled=true;zb.textContent='作成中...';
   const zip=new JSZip();
@@ -1491,15 +624,19 @@ async function downloadZip(){
   const raw=calcStamps();
 
   if(c('merge-eda')){
+    // 枝番グループをまとめる
     let i=0;
     while(i<files.length){
       const item=files[i];
       if(item.status!=='done'||!item.blob){i++;continue;}
+      // グループの範囲を特定（親 + 枝番）
       const groupEnd=findGroupEnd(i,raw);
       if(groupEnd===i){
+        // グループなし（単独ファイル）
         zip.file(outName(item,stamps[i]),await item.blob.arrayBuffer());
         i++;
       }else{
+        // グループを結合
         const merged=await PDFLib.PDFDocument.create();
         let allDone=true;
         for(let j=i;j<=groupEnd;j++){
@@ -1511,6 +648,7 @@ async function downloadZip(){
         if(allDone){
           const firstStamp=stamps[i];
           const lastStamp=stamps[groupEnd];
+          // 結合ファイル名：親のファイル名ベース、スタンプは範囲表示
           const rangeStamp=`${firstStamp}〜${lastStamp.replace(/.*[-の]/,'')}`;
           const mergedName=outName(files[i],firstStamp).replace(firstStamp,rangeStamp);
           zip.file(mergedName,await merged.save());
@@ -1542,26 +680,18 @@ function findGroupEnd(startIdx,raw){
   return end;
 }
 
-/* ─── ダーク/ライト切り替え ─── */
-function toggleMode(){
-  const isLight = document.documentElement.classList.toggle('light');
-  try{ localStorage.setItem('evstamp_theme', isLight ? 'light' : 'dark'); }catch(e){}
-  // 既存パーティクルの色を即時切り替え
-  if(window._particles){
-    const colors = document.documentElement.classList.contains('light')
-      ? ['rgba(60,110,220,','rgba(80,140,255,','rgba(40,90,200,','rgba(100,160,240,','rgba(50,120,210,']
-      : ['rgba(80,140,255,','rgba(110,170,255,','rgba(140,200,255,','rgba(60,110,220,','rgba(180,210,255,'];
-    window._particles.forEach(p => {
-      p.color = colors[Math.floor(Math.random() * colors.length)];
-    });
-  }
+/* ── 起動 ── */
+function toggleDark(){
+  document.documentElement.classList.toggle('dark');
+  const isDark=document.documentElement.classList.contains('dark');
+  try{localStorage.setItem('evstamp_theme',isDark?'dark':'light');}catch(e){}
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  // テーマ復元
   try{
-    const t = localStorage.getItem('evstamp_theme');
-    if(t === 'light') document.documentElement.classList.add('light');
+    if(localStorage.getItem('evstamp_theme')==='dark'){
+      document.documentElement.classList.add('dark');
+    }
   }catch(e){}
   loadSettings();
 });
