@@ -463,9 +463,9 @@ function outName(item,stamp){
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
-      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false});
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:''});
     else if(/image\/(jpeg|png)/.test(f.type))
-      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false});
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:''});
   }
   document.getElementById('fi').value='';
   refreshUI();
@@ -496,6 +496,10 @@ function applyVerticalAll(){
 }
 function toggleVertical(i){
   files[i].isVertical=!files[i].isVertical;
+  resetDone();refreshList();
+}
+function setSeihon(i,val){
+  files[i].seihon=val;
   resetDone();refreshList();
 }
 function setEdaStart(i,val){
@@ -547,6 +551,12 @@ function refreshList(){
       ${edaStartInput}
       <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})"${i===0?' disabled':''}>枝</button>
       <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
+      <select onchange="setSeihon(${i},this.value)" style="font-size:11px;padding:2px 4px;border:.5px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--text);font-family:inherit;cursor:pointer;flex-shrink:0" title="正副本スタンプ">
+        <option value="">正副本―</option>
+        <option value="正本"${item.seihon==='正本'?' selected':''}>正本</option>
+        <option value="副本"${item.seihon==='副本'?' selected':''}>副本</option>
+        <option value="控え"${item.seihon==='控え'?' selected':''}>控え</option>
+      </select>
       <div class="fr">${right}</div>
       <button class="rm" onclick="removeFile(${i})" title="削除" style="flex-shrink:0">×</button>`;
     el.addEventListener('dragstart',e=>{dragSrcIdx=i;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
@@ -701,6 +711,14 @@ async function stampPdf(item,text){
   const mR=parseInt(v('margin-r'))||14;
   const mT=parseInt(v('margin-t'))||14;
   page.drawImage(png,{x:width-w-mR,y:height-h-mT,width:w,height:h});
+
+  // 正副本スタンプ（左上）
+  if(item.seihon){
+    const{bytes:sb,w:sw,h:sh}=makeStampPng(item.seihon,false);
+    const spng=await doc.embedPng(sb);
+    page.drawImage(spng,{x:mR,y:height-sh-mT,width:sw,height:sh});
+  }
+
   return new Blob([await doc.save()],{type:'application/pdf'});
 }
 
