@@ -453,6 +453,13 @@ function getStamps(){return calcStamps().map(({main,eda})=>fmtStamp(main,eda));}
 function outName(item,stamp){
   const orig=item.isImg?item.file.name.replace(/\.(jpe?g|png)$/i,'.pdf'):item.file.name;
   if(!c('rename-file'))return orig;
+  // 正副本チェック済みなら正副本でリネーム
+  if(item.seihon){
+    const sep=v('separator');
+    if(sep==='kakko')return`【${item.seihon}】${orig}`;
+    if(sep==='paren')return`(${item.seihon})${orig}`;
+    return`${item.seihon}${sep==='space'?' ':'_'}${orig}`;
+  }
   const sep=v('separator');
   if(sep==='kakko')return`【${stamp}】${orig}`;
   if(sep==='paren')return`(${stamp})${orig}`;
@@ -496,6 +503,10 @@ function applyVerticalAll(){
 }
 function toggleVertical(i){
   files[i].isVertical=!files[i].isVertical;
+  resetDone();refreshList();
+}
+function toggleSeihon(i,checked){
+  files[i].seihon=checked?'正本':'';
   resetDone();refreshList();
 }
 function setSeihon(i,val){
@@ -543,7 +554,7 @@ function refreshList(){
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
       <span class="dh">⠿⠿</span>
-      <span class="sbadge${item.isEda||isEP?' ep':''}">${stamp}</span>
+      <span class="sbadge${item.seihon?'':(item.isEda||isEP?' ep':'')}" style="${item.seihon?'background:#7a3820':''}">${item.seihon||stamp}</span>
       <div class="fi-wrap">
         <div class="fi-orig">${item.file.name}${item.isImg?' → .pdf':''}</div>
         <div class="fi-new">→ ${nn}</div>
@@ -551,12 +562,14 @@ function refreshList(){
       ${edaStartInput}
       <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})"${i===0?' disabled':''}>枝</button>
       <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
-      <select onchange="setSeihon(${i},this.value)" style="font-size:11px;padding:2px 4px;border:.5px solid var(--border);border-radius:4px;background:var(--bg3);color:var(--text);font-family:inherit;cursor:pointer;flex-shrink:0" title="正副本スタンプ">
-        <option value="">正副本―</option>
-        <option value="正本"${item.seihon==='正本'?' selected':''}>正本</option>
-        <option value="副本"${item.seihon==='副本'?' selected':''}>副本</option>
-        <option value="控え"${item.seihon==='控え'?' selected':''}>控え</option>
-      </select>
+      <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer">
+        <input type="checkbox" ${item.seihon?'checked':''} onchange="toggleSeihon(${i},this.checked)" style="width:13px;height:13px;cursor:pointer;accent-color:var(--btn-bg);flex-shrink:0" title="正副本スタンプ">
+        <select onchange="setSeihon(${i},this.value)" ${item.seihon?'':'disabled'} style="font-size:11px;padding:2px 4px;border:.5px solid var(--border);border-radius:4px;background:var(--bg3);color:${item.seihon?'var(--text)':'var(--text5)'};font-family:inherit;cursor:${item.seihon?'pointer':'default'};flex-shrink:0;opacity:${item.seihon?'1':'0.4'}">
+          <option value="正本"${item.seihon==='正本'?' selected':''}>正本</option>
+          <option value="副本"${item.seihon==='副本'?' selected':''}>副本</option>
+          <option value="控え"${item.seihon==='控え'?' selected':''}>控え</option>
+        </select>
+      </label>
       <div class="fr">${right}</div>
       <button class="rm" onclick="removeFile(${i})" title="削除" style="flex-shrink:0">×</button>`;
     el.addEventListener('dragstart',e=>{dragSrcIdx=i;setTimeout(()=>el.classList.add('dragging'),0);e.dataTransfer.effectAllowed='move';});
@@ -710,13 +723,14 @@ async function stampPdf(item,text){
   const{width,height}=page.getSize();
   const mR=parseInt(v('margin-r'))||14;
   const mT=parseInt(v('margin-t'))||14;
-  page.drawImage(png,{x:width-w-mR,y:height-h-mT,width:w,height:h});
-
-  // 正副本スタンプ（左上）
   if(item.seihon){
+    // 正副本モード：正副本スタンプのみ（左上）、証拠番号スタンプはスキップ
     const{bytes:sb,w:sw,h:sh}=makeStampPng(item.seihon,false);
     const spng=await doc.embedPng(sb);
     page.drawImage(spng,{x:mR,y:height-sh-mT,width:sw,height:sh});
+  } else {
+    // 通常モード：証拠番号スタンプ（右上）
+    page.drawImage(png,{x:width-w-mR,y:height-h-mT,width:w,height:h});
   }
 
   return new Blob([await doc.save()],{type:'application/pdf'});
