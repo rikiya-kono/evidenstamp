@@ -292,30 +292,34 @@ html:not(.dark) .toggle-thumb{background:#555}
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
           <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選ぶとテキスト入力欄が現れ、任意の文字列を入力できます。複数被告がいる場合の「乙A」「乙B」や、「別紙」なども入力可能です。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">番号スタイル</td><td style="padding:5px 0;color:var(--text);line-height:1.6">mints形式（甲001）、正式（甲第1号証）、号証、ハイフン、シンプルの5種類。枝番のセパレータも自動で切り替わります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・mints・ハイフンの5種類から選択。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。スタンプとは独立して設定できます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名変更</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックを外すとファイル名はそのままでスタンプのみ付与します。リネーム不要な場合に使用。</td></tr>
         </table>
       </section>
 
       <section>
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">枝番の使い方</div>
-        <p style="font-size:13px;line-height:1.8;color:#333;margin-bottom:8px">ファイル行右側の「枝」ボタンをオンにすると、そのファイルを直前のグループの枝番として扱います。先頭ファイルは枝番にできません。</p>
-        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;line-height:2;color:#555;font-family:monospace">
-          メール本文.pdf　→　<b>甲第2号証の1</b>　（次が枝なので自動での1になる）<br>
-          添付PDF1.pdf　[枝]　→　<b>甲第2号証の2</b><br>
-          添付PDF2.pdf　[枝]　→　<b>甲第2号証の3</b>
+        <p style="font-size:13px;line-height:1.8;color:var(--text);margin-bottom:8px">ファイル行右側の「枝」ボタンをオンにすると、そのファイルが枝番扱いになります。枝チェックを入れたファイル自身がその番号を持ち、「の1」から始まります。</p>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;line-height:2;color:var(--text4);font-family:monospace">
+          メール本文.pdf　→　<b>甲第2号証</b>　（枝なし・通常）<br>
+          添付PDF1.pdf　[枝]　→　<b>甲第3号証の1</b>　（枝チェックで自身の番号を取得）<br>
+          添付PDF2.pdf　[枝]　→　<b>甲第3号証の2</b><br>
+          次の書証.pdf　→　<b>甲第4号証</b>
         </div>
-        <p style="font-size:13px;line-height:1.8;color:#333;margin-top:8px">親の行に表示される「の <input readonly style="width:28px;text-align:center;font-size:11px;border:.5px solid #CCC;border-radius:3px;padding:1px">」入力でグループごとに枝番の開始番号を設定できます（既存の枝番の続きから付け足す場合などに使用）。</p>
+        <p style="font-size:13px;line-height:1.8;color:var(--text);margin-top:8px">最初の枝ファイルの行に表示される「の <input readonly style="width:28px;text-align:center;font-size:11px;border:.5px solid var(--border);border-radius:3px;padding:1px;background:var(--bg3);color:var(--text)">」入力で枝番の開始番号を変更できます（別の事件での続き番号から始めたい場合などに使用）。なお、1ファイル目でも枝番に設定できます。</p>
       </section>
 
       <section>
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">その他の機能</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
-          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「⠿⠿」をドラッグして順序を変更できます。並び替え後は再付与が必要です。</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「☰」をドラッグして順序を変更できます。要素の上半分にドロップすると前に、下半分にドロップすると後ろに挿入されます。並び替え後は再付与が必要です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">再付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">JPG・PNG</td><td style="padding:5px 0;color:var(--text);line-height:1.6">画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">白背景</td><td style="padding:5px 0;color:var(--text);line-height:1.6">スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">縦書きスタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">縦書き文書用にスタンプテキストを縦組みで描画します。数字・英字は自動的に横向きに回転されます。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">縦書きスタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">縦書き文書用にスタンプテキストを縦組みで描画します。連続する数字は1スロットにまとめて表示されます（「12」が縦に並んでも崩れません）。「まとめて縦書き」で全ファイルに適用、各ファイル行の「縦」ボタンで個別設定も可能です。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">正副本スタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各ファイル行のチェックをオンにすると正本・副本・控えのプルダウンが有効になります。正副本チェック済みファイルは証拠番号スタンプなしで左上に正副本スタンプのみ付与され、証拠番号の連番からも除外されます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ページ番号付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">枝番グループを結合</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">メタデータ削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
@@ -432,7 +436,10 @@ function calcStamps(){
   const out=[];
   for(let i=0;i<files.length;i++){
     const prevIsEda=i>0&&files[i-1].isEda;
-    if(!files[i].isEda){
+    if(files[i].seihon){
+      // 正副本ファイル：証拠番号カウントをスキップ
+      out.push({main,eda:0,skip:true});
+    }else if(!files[i].isEda){
       // 通常ファイル：番号を進める
       main++;
       out.push({main,eda:0});
@@ -462,8 +469,8 @@ function _fmt(s,main,eda,t){
 function fmtStamp(main,eda){return _fmt(v('stamp-style'),main,eda,getSym());}
 function fmtName(main,eda){return _fmt(v('name-style'),main,eda,getSym());}
 
-function getStamps(){return calcStamps().map(({main,eda})=>fmtStamp(main,eda));}
-function getNames(){return calcStamps().map(({main,eda})=>fmtName(main,eda));}
+function getStamps(){return calcStamps().map(({main,eda,skip})=>skip?'':fmtStamp(main,eda));}
+function getNames(){return calcStamps().map(({main,eda,skip})=>skip?'':fmtName(main,eda));}
 
 function outName(item,stamp){
   const orig=item.isImg?item.file.name.replace(/\.(jpe?g|png)$/i,'.pdf'):item.file.name;
