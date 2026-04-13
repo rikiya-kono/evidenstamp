@@ -172,24 +172,23 @@ html:not(.dark) .toggle-thumb{background:#555}
         <div class="fl">スタンプの形式</div>
         <select id="stamp-style" onchange="refreshList();save()">
           <option value="formal" selected>甲第1号証（正式）</option>
-          <option value="gocho">甲1号証（号証）</option>
+          <option value="gocho">甲1号証（「第」省略）</option>
           <option value="simple">甲1（シンプル）</option>
           <option value="mints">甲001（mints）</option>
           <option value="hyphen">甲1（ハイフン）</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" id="name-style-field">
         <div class="fl">ファイル名の形式</div>
         <select id="name-style" onchange="refreshList();save()">
           <option value="mints" selected>甲001（mints推奨）</option>
           <option value="formal">甲第1号証（正式）</option>
-          <option value="gocho">甲1号証（号証）</option>
-          <option value="hyphen">甲1（ハイフン）</option>
-          <option value="simple">甲1（シンプル）</option>
-          <option value="numonly">番号のみ（元のファイル名を削除）</option>
+          <option value="gocho">甲1号証（「第」省略）</option>
+          <option value="hyphen">甲1（枝番ハイフン）</option>
+          <option value="simple">甲1（枝番「の」）</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" id="sep-field">
         <div class="fl">ファイル名の区切り</div>
         <select id="separator" onchange="refreshList();save()">
           <option value="space">半角スペース　甲001 書類名</option>
@@ -199,7 +198,10 @@ html:not(.dark) .toggle-thumb{background:#555}
         </select>
       </div>
       <div class="field" style="justify-content:flex-end">
-        <label class="chk"><input type="checkbox" id="rename-file" checked onchange="refreshList();save()"> ファイル名変更</label>
+        <label class="chk"><input type="checkbox" id="rename-file" checked onchange="onRenameFile();save()"> ファイル名変更</label>
+      </div>
+      <div class="field" id="strip-name-field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="strip-name" onchange="onStripName();save()"> 元のファイル名を削除</label>
       </div>
     </div>
 
@@ -302,9 +304,10 @@ html:not(.dark) .toggle-thumb{background:#555}
         <table style="font-size:13px;width:100%;border-collapse:collapse">
           <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選んで入力しEnterを押すと、プルダウンに追加されて次回以降ワンクリックで呼び出せます。複数被告がいる場合の「乙A」「乙B」や「別紙」なども登録可能。追加済みのカスタム符号を選ぶと「削除」ボタンが表示されます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・mints・ハイフンの5種類から選択。ファイル名の形式とは独立して設定できます。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。スタンプとは独立して設定できます。枝番がある場合、シンプルは「甲1の1」、ハイフンは「甲1-1」形式になります。「番号のみ」を選ぶと元のファイル名を削除して「甲001.pdf」のように番号だけのファイル名になります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。スタンプとは独立して設定できます。枝番がある場合、「枝番の」は甲1の1、「枝番ハイフン」は甲1-1形式になります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名変更</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックを外すとファイル名はそのままでスタンプのみ付与します。リネーム不要な場合に使用。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名変更</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックを外すとファイル名はそのままでスタンプのみ付与します。オフにするとファイル名の形式・区切り文字・元のファイル名を削除の設定がすべて無効になります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">元のファイル名を削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックをオンにすると「甲001.pdf」のように番号だけのファイル名になります。オンのときは区切り文字の設定が無効になります。</td></tr>
         </table>
       </section>
 
@@ -559,14 +562,14 @@ function outName(item,stamp){
   if(!c('rename-file'))return orig;
   // 正副本チェック済みなら正副本でリネーム
   if(item.seihon){
-    if(v('name-style')==='numonly')return`${item.seihon}.pdf`;
+    if(c('strip-name'))return`${item.seihon}.pdf`;
     const sep=v('separator');
     if(sep==='kakko')return`【${item.seihon}】${orig}`;
     if(sep==='paren')return`(${item.seihon})${orig}`;
     return`${item.seihon}${sep==='space'?' ':'_'}${orig}`;
   }
   // 番号のみ
-  if(v('name-style')==='numonly')return`${stamp}.pdf`;
+  if(c('strip-name'))return`${stamp}.pdf`;
   const sep=v('separator');
   if(sep==='kakko')return`【${stamp}】${orig}`;
   if(sep==='paren')return`(${stamp})${orig}`;
@@ -936,6 +939,21 @@ function findGroupEnd(startIdx,raw){
 }
 
 /* ── 起動 ── */
+function onRenameFile(){
+  const on=c('rename-file');
+  const ids=['name-style-field','sep-field','strip-name-field'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.opacity=on?'1':'0.35';el.style.pointerEvents=on?'auto':'none';}
+  });
+  refreshList();
+}
+function onStripName(){
+  const strip=c('strip-name');
+  const sf=document.getElementById('sep-field');
+  if(sf){sf.style.opacity=strip?'0.35':'1';sf.style.pointerEvents=strip?'none':'auto';}
+  refreshList();
+}
 function toggleDark(){
   document.documentElement.classList.toggle('dark');
   const isDark=document.documentElement.classList.contains('dark');
