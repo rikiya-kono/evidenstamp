@@ -167,13 +167,23 @@ html:not(.dark) .toggle-thumb{background:#555}
       </div>
 
       <div class="field">
-        <div class="fl">番号スタイル</div>
-        <select id="num-style" onchange="refreshList();save()">
-          <option value="mints">甲001 / 甲001-1（mints）</option>
-          <option value="formal" selected>甲第1号証 / 甲第1号証の1（正式）</option>
-          <option value="gocho">甲1号証 / 甲1号証の1（号証）</option>
-          <option value="hyphen">甲1 / 甲1-1（ハイフン）</option>
-          <option value="simple">甲1 / 甲1の1（シンプル）</option>
+        <div class="fl">スタンプの形式</div>
+        <select id="stamp-style" onchange="refreshList();save()">
+          <option value="formal" selected>甲第1号証（正式）</option>
+          <option value="gocho">甲1号証（号証）</option>
+          <option value="simple">甲1（シンプル）</option>
+          <option value="mints">甲001（mints）</option>
+          <option value="hyphen">甲1（ハイフン）</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="fl">ファイル名の形式</div>
+        <select id="name-style" onchange="refreshList();save()">
+          <option value="mints" selected>甲001（mints推奨）</option>
+          <option value="formal">甲第1号証（正式）</option>
+          <option value="gocho">甲1号証（号証）</option>
+          <option value="hyphen">甲1（ハイフン）</option>
+          <option value="simple">甲1（シンプル）</option>
         </select>
       </div>
       <div class="field">
@@ -436,8 +446,7 @@ function calcStamps(){
   return out;
 }
 
-function fmtStamp(main,eda){
-  const s=v('num-style'),t=getSym();
+function _fmt(s,main,eda,t){
   const dash=s==='mints'||s==='hyphen';
   let base;
   if(s==='mints')base=`${t}${String(main).padStart(3,'0')}`;
@@ -447,8 +456,11 @@ function fmtStamp(main,eda){
   if(eda>0)base+=dash?`-${eda}`:`の${eda}`;
   return base;
 }
+function fmtStamp(main,eda){return _fmt(v('stamp-style'),main,eda,getSym());}
+function fmtName(main,eda){return _fmt(v('name-style'),main,eda,getSym());}
 
 function getStamps(){return calcStamps().map(({main,eda})=>fmtStamp(main,eda));}
+function getNames(){return calcStamps().map(({main,eda})=>fmtName(main,eda));}
 
 function outName(item,stamp){
   const orig=item.isImg?item.file.name.replace(/\.(jpe?g|png)$/i,'.pdf'):item.file.name;
@@ -539,9 +551,10 @@ function refreshUI(){
 function refreshList(){
   const list=document.getElementById('fl');list.innerHTML='';
   const stamps=getStamps();
+  const names=getNames();
   const raw=calcStamps();
   files.forEach((item,i)=>{
-    const stamp=stamps[i],nn=outName(item,stamp);
+    const stamp=stamps[i],nn=outName(item,names[i]);
     const isEP=!item.isEda&&raw[i].eda>0;
     let right='';
     if(item.status==='pending')right=`<span class="sw">待機中</span>`;
@@ -743,7 +756,7 @@ async function processAll(){
   resetDone();
   const btn=document.getElementById('pbtn');btn.disabled=true;btn.textContent='処理中...';
   document.getElementById('pw').style.display='block';
-  const stamps=getStamps();let done=0;
+  const stamps=getStamps();const names=getNames();let done=0;
   for(let i=0;i<files.length;i++){
     const item=files[i];
     item.status='processing';
@@ -751,7 +764,7 @@ async function processAll(){
     document.getElementById('pb').style.width=`${i/files.length*100}%`;
     refreshList();await new Promise(r=>setTimeout(r,0));
     try{
-      const blob=await stampPdf(item,stamps[i]);
+      const blob=await stampPdf(item,stamps[i],names[i]);
       if(item.url)URL.revokeObjectURL(item.url);
       item.blob=blob;item.url=URL.createObjectURL(blob);item.status='done';
     }catch(e){console.error(e);item.status='error';}
@@ -768,6 +781,7 @@ async function downloadZip(){
   const zb=document.getElementById('zbtn');zb.disabled=true;zb.textContent='作成中...';
   const zip=new JSZip();
   const stamps=getStamps();
+  const names=getNames();
   const raw=calcStamps();
 
   if(c('merge-eda')){
@@ -780,7 +794,7 @@ async function downloadZip(){
       const groupEnd=findGroupEnd(i,raw);
       if(groupEnd===i){
         // グループなし（単独ファイル）
-        zip.file(outName(item,stamps[i]),await item.blob.arrayBuffer());
+        zip.file(outName(item,names[i]),await item.blob.arrayBuffer());
         i++;
       }else{
         // グループを結合
@@ -807,7 +821,7 @@ async function downloadZip(){
     for(let i=0;i<files.length;i++){
       const item=files[i];
       if(item.status!=='done'||!item.blob)continue;
-      zip.file(outName(item,stamps[i]),await item.blob.arrayBuffer());
+      zip.file(outName(item,names[i]),await item.blob.arrayBuffer());
     }
   }
 
