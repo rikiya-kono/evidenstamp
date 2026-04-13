@@ -141,8 +141,8 @@ html:not(.dark) .toggle-thumb{background:#555}
     <div class="row">
       <div class="field">
         <div class="fl">符号</div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <select id="sym-sel" onchange="onSymSel();save()">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <select id="sym-sel" onchange="onSymSel();save()" style="min-width:80px">
             <option value="甲">甲</option>
             <option value="乙">乙</option>
             <option value="丙">丙</option>
@@ -152,7 +152,11 @@ html:not(.dark) .toggle-thumb{background:#555}
             <option value="疎乙">疎乙</option>
             <option value="__c__">カスタム...</option>
           </select>
-          <input type="text" id="csym" class="sym-custom" placeholder="例：乙A" oninput="refreshList();save()" maxlength="10" style="display:none">
+          <div style="display:flex;gap:4px;align-items:center">
+            <input type="text" id="csym" class="sym-custom" placeholder="例：乙A（Enterで追加）" oninput="onCsymInput()" onkeydown="if(event.key==='Enter')addCustomSym()" maxlength="10" style="display:none">
+            <button id="csym-add" onclick="addCustomSym()" style="display:none;font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">追加</button>
+            <button id="csym-del" onclick="delCustomSym()" style="display:none;font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--err);cursor:pointer;font-family:inherit">削除</button>
+          </div>
         </div>
       </div>
       <div class="field">
@@ -237,6 +241,10 @@ html:not(.dark) .toggle-thumb{background:#555}
       <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="merge-eda" onchange="save()"> 枝番グループを結合</label>
       </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+      <button onclick="saveMyDefault()" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">現在の設定をマイデフォルトに保存</button>
+      <button onclick="loadMyDefault()" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">マイデフォルトに戻す</button>
     </div>
   </div>
 
@@ -414,13 +422,85 @@ function v(id){return document.getElementById(id)?.value;}
 function c(id){return document.getElementById(id)?.checked;}
 
 /* ── 符号 ── */
-function getSym(){
-  return v('sym-sel')==='__c__'?(v('csym')||'甲'):v('sym-sel');
+const CUSTOM_SYMS_KEY='evstamp_custom_syms';
+const MY_DEFAULT_KEY='evstamp_mydefault';
+
+function getCustomSyms(){
+  try{return JSON.parse(localStorage.getItem(CUSTOM_SYMS_KEY))||[];}catch(e){return[];}
 }
+function saveCustomSyms(arr){
+  try{localStorage.setItem(CUSTOM_SYMS_KEY,JSON.stringify(arr));}catch(e){}
+}
+function buildSymOptions(){
+  const sel=document.getElementById('sym-sel');
+  const cur=sel.value;
+  const fixed=['甲','乙','丙','弁','資料','疎甲','疎乙'];
+  const customs=getCustomSyms();
+  sel.innerHTML='';
+  fixed.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
+  customs.forEach(v=>{const o=document.createElement('option');o.value='__custom__'+v;o.textContent=v;sel.appendChild(o);});
+  const ph=document.createElement('option');ph.value='__c__';ph.textContent='カスタム...';sel.appendChild(ph);
+  sel.value=cur;
+  if(!sel.value)sel.value='甲';
+}
+function getSym(){
+  const val=v('sym-sel')||'甲';
+  if(val==='__c__')return(v('csym')||'甲');
+  if(val.startsWith('__custom__'))return val.replace('__custom__','');
+  return val;
+}
+function onCsymInput(){refreshList();}
 function onSymSel(){
-  const isC=v('sym-sel')==='__c__';
-  document.getElementById('csym').style.display=isC?'':'none';
-  if(!isC)refreshList();
+  const val=v('sym-sel');
+  const isInput=val==='__c__';
+  const isCustom=val&&val.startsWith('__custom__');
+  document.getElementById('csym').style.display=isInput?'':'none';
+  document.getElementById('csym-add').style.display=isInput?'':'none';
+  document.getElementById('csym-del').style.display=isCustom?'':'none';
+  if(!isInput)refreshList();
+}
+function addCustomSym(){
+  const val=document.getElementById('csym').value.trim();
+  if(!val)return;
+  const fixed=['甲','乙','丙','弁','資料','疎甲','疎乙'];
+  const customs=getCustomSyms();
+  if(fixed.includes(val)||customs.includes(val))return;
+  customs.push(val);
+  saveCustomSyms(customs);
+  buildSymOptions();
+  document.getElementById('sym-sel').value='__custom__'+val;
+  document.getElementById('csym').style.display='none';
+  document.getElementById('csym-add').style.display='none';
+  document.getElementById('csym-del').style.display='block';
+  refreshList();save();
+}
+function delCustomSym(){
+  const val=v('sym-sel');
+  if(!val||!val.startsWith('__custom__'))return;
+  const sym=val.replace('__custom__','');
+  saveCustomSyms(getCustomSyms().filter(c=>c!==sym));
+  buildSymOptions();
+  document.getElementById('sym-sel').value='甲';
+  document.getElementById('csym-del').style.display='none';
+  refreshList();save();
+}
+function saveMyDefault(){
+  try{
+    const s=localStorage.getItem('koc2_settings');
+    if(s)localStorage.setItem(MY_DEFAULT_KEY,s);
+    const btn=event.currentTarget;const orig=btn.textContent;
+    btn.textContent='保存しました';setTimeout(()=>btn.textContent=orig,1500);
+  }catch(e){}
+}
+function loadMyDefault(){
+  try{
+    const s=localStorage.getItem(MY_DEFAULT_KEY);
+    if(!s)return;
+    localStorage.setItem('koc2_settings',s);
+    buildSymOptions();loadSettings();refreshList();
+    const btn=event.currentTarget;const orig=btn.textContent;
+    btn.textContent='復元しました';setTimeout(()=>btn.textContent=orig,1500);
+  }catch(e){}
 }
 
 function adj(d){
@@ -863,6 +943,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       document.documentElement.classList.add('dark');
     }
   }catch(e){}
+  buildSymOptions();
   loadSettings();
 });
 </script>
