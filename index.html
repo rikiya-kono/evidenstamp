@@ -125,7 +125,7 @@ html:not(.dark) .toggle-thumb{background:#555}
 <div class="wrap">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
     <h1>EvidenStamp</h1>
-    <button onclick="document.getElementById('help-modal').style.display='flex'" id="help-btn" style="width:22px;height:22px;border-radius:50%;border:.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;flex-shrink:0;line-height:1">?</button>
+    <button onclick="document.getElementById('help-modal').style.display='flex'" id="help-btn" style="border:.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:11px;color:var(--text2);font-family:inherit;flex-shrink:0;border-radius:6px;padding:3px 9px;line-height:1.4">使い方</button>
     <div class="mode-toggle">
       <span class="toggle-icon light-icon">☀️</span>
       <div class="toggle-track" onclick="toggleDark()" title="ダーク/ライト切り替え">
@@ -146,15 +146,13 @@ html:not(.dark) .toggle-thumb{background:#555}
             <option value="甲">甲</option>
             <option value="乙">乙</option>
             <option value="丙">丙</option>
-            <option value="丁">丁</option>
-            <option value="戊">戊</option>
             <option value="弁">弁</option>
             <option value="資料">資料</option>
             <option value="疎甲">疎甲</option>
             <option value="疎乙">疎乙</option>
             <option value="__c__">カスタム...</option>
           </select>
-          <input type="text" id="csym" class="sym-custom" placeholder="入力" oninput="refreshList();save()" maxlength="10" style="display:none">
+          <input type="text" id="csym" class="sym-custom" placeholder="例：乙A" oninput="refreshList();save()" maxlength="10" style="display:none">
         </div>
       </div>
       <div class="field">
@@ -293,7 +291,7 @@ html:not(.dark) .toggle-thumb{background:#555}
       <section>
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
-          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲〜疎乙の9種類から選択。「カスタム...」で任意の文字列（例：別紙）も入力可能。</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選ぶとテキスト入力欄が現れ、任意の文字列を入力できます。複数被告がいる場合の「乙A」「乙B」や、「別紙」なども入力可能です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">番号スタイル</td><td style="padding:5px 0;color:var(--text);line-height:1.6">mints形式（甲001）、正式（甲第1号証）、号証、ハイフン、シンプルの5種類。枝番のセパレータも自動で切り替わります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
         </table>
@@ -570,7 +568,7 @@ function refreshList(){
     const el=document.createElement('div');
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
-      <span class="dh">⠿⠿</span>
+      <span class="dh">☰</span>
       <span class="sbadge${item.seihon?'':(item.isEda?' ep':'')}" style="${item.seihon?'background:#7a3820':''}">${item.seihon||stamp}</span>
       <div class="fi-wrap">
         <div class="fi-orig">${item.file.name}${item.isImg?' → .pdf':''}</div>
