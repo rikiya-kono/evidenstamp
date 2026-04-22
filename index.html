@@ -258,6 +258,11 @@ html:not(.dark) .toggle-thumb{background:#555}
   </div>
 
   <div id="flc">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button onclick="sortByFileName()" style="flex:1;padding:7px 12px;border:.5px solid var(--border);border-radius:7px;background:var(--bg3);color:var(--text2);font-size:12px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px" title="ファイル名に含まれる数値（甲1_○○など）を検出して昇順に並び替えます">
+        <span style="font-size:14px">↕</span> ファイル名の番号順に自動整列
+      </button>
+    </div>
     <div class="flc-top">
       <span id="flabel" class="fc"></span>
       <span class="fh">「枝」で枝番 · ドラッグで並び替え</span>
@@ -326,7 +331,7 @@ html:not(.dark) .toggle-thumb{background:#555}
       <section>
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">その他の機能</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
-          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「☰」をドラッグして順序を変更できます。要素の上半分にドロップすると前に、下半分にドロップすると後ろに挿入されます。並び替え後は再付与が必要です。</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「☰」をドラッグして順序を変更できます。要素の上半分にドロップすると前に、下半分にドロップすると後ろに挿入されます。ファイルリスト右上の「番号順に整列」ボタンを押すと、ファイル名に含まれる数値（甲1_〇〇、甲2_△△など）を検出して自動的に並び替えます。並び替え後は再付与が必要です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">再付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">JPG・PNG</td><td style="padding:5px 0;color:var(--text);line-height:1.6">画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">白背景</td><td style="padding:5px 0;color:var(--text);line-height:1.6">スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
@@ -586,6 +591,26 @@ async function handleFiles(fl){
   }
   document.getElementById('fi').value='';
   refreshUI();
+}
+
+function sortByFileName(){
+  if(!files.length)return;
+  // ファイル名の先頭・途中にある最初の数値を抽出してキーにする
+  const extractNum=(name)=>{
+    // 拡張子を除いて最初の数値を取得（全角数字も対応）
+    const base=name.replace(/\.[^.]+$/,'');
+    const zen2han=s=>s.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+    const hanBase=zen2han(base);
+    const m=hanBase.match(/\d+/);
+    return m?parseInt(m[0],10):Number.MAX_SAFE_INTEGER;
+  };
+  files.sort((a,b)=>{
+    const na=extractNum(a.file.name);
+    const nb=extractNum(b.file.name);
+    if(na!==nb)return na-nb;
+    return a.file.name.localeCompare(b.file.name);
+  });
+  resetDone();refreshList();
 }
 
 function clearAll(){
