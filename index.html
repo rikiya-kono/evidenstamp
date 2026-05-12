@@ -95,7 +95,15 @@ input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-
 #zbtn:hover:not(:disabled){background:var(--sbtn-hover)!important}
 .note{font-size:11px;color:var(--text5);text-align:center;margin-top:1.2rem;line-height:1.7}
 
-/* ─── ダーク/ライトトグル ─── */
+/* ─── 枝グループ区切り ─── */
+.eda-divider{height:0;overflow:visible;position:relative;cursor:pointer;margin:0;padding:0}
+.eda-divider::after{content:'';position:absolute;left:0;right:0;top:-6px;height:12px;z-index:9}
+.eda-line{display:none}
+.eda-label{position:absolute;left:50%;transform:translate(-50%,-50%);top:0;font-size:10px;white-space:nowrap;padding:1px 8px;border:.5px solid transparent;border-radius:4px;background:var(--bg);pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+.eda-divider:hover .eda-label{opacity:1;border-color:var(--border);background:var(--bg3);color:var(--text3);pointer-events:auto}
+.eda-divider.active::before{content:'';position:absolute;left:0;right:0;top:0;height:1.5px;background:var(--ins-line);transform:translateY(-50%)}
+.eda-divider.active .eda-label{opacity:1;border-color:var(--ins-line);background:var(--ins-bg);color:var(--ins-line);pointer-events:auto}
+
 .mode-toggle{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
 .toggle-icon{font-size:13px;line-height:1;transition:opacity .25s}
 html.dark .toggle-icon.dark-icon{opacity:1}
@@ -533,8 +541,8 @@ function calcStamps(){
       // 通常ファイル：番号を進める
       main++;
       out.push({main,eda:0});
-    }else if(!prevIsEda){
-      // 枝グループの最初：自身の番号を持つ・edaStartから開始
+    }else if(!prevIsEda||files[i].isEdaGroupStart){
+      // 枝グループの最初 or 区切りフラグ：新しい幹番号を取得・edaStartから開始
       main++;
       const es=parseInt(files[i].edaStart)||1;
       out.push({main,eda:es});
@@ -585,9 +593,9 @@ function outName(item,stamp){
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
-      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:''});
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
     else if(/image\/(jpeg|png)/.test(f.type))
-      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:''});
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
   }
   document.getElementById('fi').value='';
   refreshUI();
@@ -633,6 +641,10 @@ function toggleEda(i){
 function applyVerticalAll(){
   const val=c('stamp-vertical');
   files.forEach(f=>f.isVertical=val);
+  resetDone();refreshList();
+}
+function toggleEdaGroupStart(i){
+  files[i].isEdaGroupStart=!files[i].isEdaGroupStart;
   resetDone();refreshList();
 }
 function toggleVertical(i){
@@ -683,7 +695,7 @@ function refreshList(){
     else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
     else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
     else right=`<span class="se">エラー</span>`;
-    const isFirstEda=item.isEda&&(i===0||!files[i-1].isEda); // 枝グループの先頭
+    const isFirstEda=item.isEda&&(i===0||!files[i-1].isEda||item.isEdaGroupStart); // 枝グループの先頭
     const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
@@ -733,6 +745,22 @@ function refreshList(){
       resetDone();dragSrcIdx=null;refreshUI();
     });
     list.appendChild(el);
+
+    // 連続する枝ファイルの間にグループ区切りを表示
+    const nextIsEda=i+1<files.length&&files[i+1].isEda;
+    if(item.isEda&&nextIsEda){
+      const nextGroupStart=files[i+1].isEdaGroupStart;
+      const div=document.createElement('div');
+      div.className='eda-divider'+(nextGroupStart?' active':'');
+      div.dataset.idx=i+1;
+      div.onclick=()=>{toggleEdaGroupStart(i+1);};
+      if(nextGroupStart){
+        div.innerHTML=`<div class="eda-line"></div><span class="eda-label">グループ区切り ×</span><div class="eda-line"></div>`;
+      }else{
+        div.innerHTML=`<div class="eda-line"></div><span class="eda-label">＋ グループ区切り</span><div class="eda-line"></div>`;
+      }
+      list.appendChild(div);
+    }
   });
   document.getElementById('zbtn').disabled=!files.length||!files.every(f=>f.status==='done');
 }
