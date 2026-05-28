@@ -96,12 +96,12 @@ input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-
 .note{font-size:11px;color:var(--text5);text-align:center;margin-top:1.2rem;line-height:1.7}
 
 /* ─── 枝グループ区切り ─── */
-.eda-divider{height:0;overflow:visible;position:relative;cursor:pointer;margin:0;padding:0}
-.eda-divider::after{content:'';position:absolute;left:0;right:0;top:-6px;height:12px;z-index:9}
-.eda-line{display:none}
-.eda-label{position:absolute;left:50%;transform:translate(-50%,-50%);top:0;font-size:10px;white-space:nowrap;padding:1px 8px;border:.5px solid transparent;border-radius:4px;background:var(--bg);pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+.eda-divider{display:flex;align-items:center;height:6px;cursor:pointer;position:relative;margin:0;padding:0 4px}
+.eda-line{flex:1;height:1px;background:var(--border3);transition:background .15s}
+.eda-label{position:absolute;left:50%;transform:translateX(-50%);top:50%;margin-top:-10px;font-size:10px;white-space:nowrap;padding:1px 8px;border:.5px solid transparent;border-radius:4px;background:var(--bg);pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
 .eda-divider:hover .eda-label{opacity:1;border-color:var(--border);background:var(--bg3);color:var(--text3);pointer-events:auto}
-.eda-divider.active::before{content:'';position:absolute;left:0;right:0;top:0;height:1.5px;background:var(--ins-line);transform:translateY(-50%)}
+.eda-divider:hover .eda-line{background:var(--border2)}
+.eda-divider.active .eda-line{background:var(--ins-line)}
 .eda-divider.active .eda-label{opacity:1;border-color:var(--ins-line);background:var(--ins-bg);color:var(--ins-line);pointer-events:auto}
 
 .mode-toggle{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto}
@@ -413,7 +413,9 @@ function save(){
   try{
     localStorage.setItem(SK,JSON.stringify({
       symSel:v('sym-sel'),csym:v('csym'),
-      startNum:v('start-num'),numStyle:v('num-style'),separator:v('separator'),
+      startNum:v('start-num'),
+      stampStyle:v('stamp-style'),nameStyle:v('name-style'),separator:v('separator'),
+      renameFile:c('rename-file'),stripName:c('strip-name'),
       stampSize:v('stamp-size'),stampColor:v('stamp-color'),
       marginR:v('margin-r'),marginT:v('margin-t'),
       stampBg:c('stamp-bg'),stampVertical:c('stamp-vertical'),delMeta:c('del-meta'),
@@ -428,12 +430,14 @@ function loadSettings(){
     const set=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).value=val;};
     const chk=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).checked=!!val;};
     set('sym-sel',s.symSel);set('csym',s.csym);
-    set('start-num',s.startNum);set('num-style',s.numStyle);set('separator',s.separator);
+    set('start-num',s.startNum);
+    set('stamp-style',s.stampStyle||s.numStyle);set('name-style',s.nameStyle);set('separator',s.separator);
+    chk('rename-file',s.renameFile);chk('strip-name',s.stripName);
     set('stamp-size',s.stampSize);set('stamp-color',s.stampColor);
     set('margin-r',s.marginR);set('margin-t',s.marginT);
     chk('stamp-bg',s.stampBg);chk('stamp-vertical',s.stampVertical);chk('del-meta',s.delMeta);
     chk('page-num',s.pageNum);chk('merge-eda',s.mergeEda);
-    onSymSel();
+    onSymSel();onRenameFile();onStripName();
   }catch(e){}
 }
 function v(id){return document.getElementById(id)?.value;}
@@ -872,6 +876,78 @@ async function addPageNumbers(doc){
   });
 }
 
+function normAngle(page){
+  const raw=page.getRotation?.().angle||0;
+  return ((raw%360)+360)%360;
+}
+
+function visibleBox(page){
+  // 表示領域はCropBoxを優先。取得できない/異常な場合はMediaBox→getSizeにフォールバック。
+  try{
+    const b=page.getCropBox?.()||page.getMediaBox?.();
+    if(b&&Number.isFinite(b.width)&&Number.isFinite(b.height)&&b.width>0&&b.height>0){
+      return{x:b.x||0,y:b.y||0,width:b.width,height:b.height};
+    }
+  }catch(e){}
+  const sz=page.getSize();
+  return{x:0,y:0,width:sz.width,height:sz.height};
+}
+
+function visualPageSize(page){
+  const b=visibleBox(page);
+  const a=normAngle(page);
+  if(a===90||a===270)return{width:b.height,height:b.width,box:b,angle:a};
+  return{width:b.width,height:b.height,box:b,angle:a};
+}
+
+function visualToPdfPoint(page,vx,vy){
+  const b=visibleBox(page);
+  const a=normAngle(page);
+  const W=b.width,H=b.height;
+
+  // PDFの /Rotate は、実際のビューア上では時計回り方向として効く。
+  // したがって「見た目上の座標」→「PDF内部座標」への逆変換は以下になる。
+  if(a===0)return{x:b.x+vx,y:b.y+vy};
+  if(a===90)return{x:b.x+W-vy,y:b.y+vx};
+  if(a===180)return{x:b.x+W-vx,y:b.y+H-vy};
+  if(a===270)return{x:b.x+vy,y:b.y+H-vx};
+  return{x:b.x+vx,y:b.y+vy};
+}
+
+function stampCounterRotationForPage(page){
+  // /Rotate 90 のページは表示時に時計回りへ回るため、
+  // スタンプ画像自体は同じ角度だけ反時計回りに描いて相殺する。
+  return normAngle(page);
+}
+
+function drawImageInVisualPosition(page,img,{x,y,width,height}){
+  const p=visualToPdfPoint(page,x,y);
+  page.drawImage(img,{
+    x:p.x,y:p.y,width,height,
+    rotate:PDFLib.degrees(stampCounterRotationForPage(page))
+  });
+}
+
+function drawImageTopRight(page,img,w,h,mR,mT){
+  const vps=visualPageSize(page);
+  drawImageInVisualPosition(page,img,{
+    x:vps.width-w-mR,
+    y:vps.height-h-mT,
+    width:w,
+    height:h
+  });
+}
+
+function drawImageTopLeft(page,img,w,h,mL,mT){
+  const vps=visualPageSize(page);
+  drawImageInVisualPosition(page,img,{
+    x:mL,
+    y:vps.height-h-mT,
+    width:w,
+    height:h
+  });
+}
+
 async function stampPdf(item,text){
   const pdfFile=item.isImg?await imageToPdf(item.file):item.file;
   const doc=await PDFLib.PDFDocument.load(await pdfFile.arrayBuffer());
@@ -883,17 +959,16 @@ async function stampPdf(item,text){
   const{bytes,w,h}=makeStampPng(text,item.isVertical);
   const png=await doc.embedPng(bytes);
   const page=doc.getPages()[0];
-  const{width,height}=page.getSize();
   const mR=parseInt(v('margin-r'))||14;
   const mT=parseInt(v('margin-t'))||14;
   if(item.seihon){
-    // 正副本モード：正副本スタンプのみ（左上）、証拠番号スタンプはスキップ
+    // 正副本モード：正副本スタンプのみ（見た目上の左上）。PDF内部の/Rotateは変更しない。
     const{bytes:sb,w:sw,h:sh}=makeStampPng(item.seihon,false);
     const spng=await doc.embedPng(sb);
-    page.drawImage(spng,{x:mR,y:height-sh-mT,width:sw,height:sh});
+    drawImageTopLeft(page,spng,sw,sh,mR,mT);
   } else {
-    // 通常モード：証拠番号スタンプ（右上）
-    page.drawImage(png,{x:width-w-mR,y:height-h-mT,width:w,height:h});
+    // 通常モード：証拠番号スタンプ（見た目上の右上）。/Rotate 90/180/270を考慮する。
+    drawImageTopRight(page,png,w,h,mR,mT);
   }
 
   return new Blob([await doc.save()],{type:'application/pdf'});
