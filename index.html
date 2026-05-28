@@ -537,22 +537,29 @@ function calcStamps(){
   let main=start-1;
   const out=[];
   for(let i=0;i<files.length;i++){
-    const prevIsEda=i>0&&files[i-1].isEda;
-    if(files[i].seihon){
-      // 正副本ファイル：証拠番号カウントをスキップ
+    const item=files[i];
+    const prev=files[i-1];
+    // 正副本ファイルは、証拠番号の連番だけでなく「枝番の連続判定」からも完全に除外する。
+    // これを入れないと、正副本行にisEda状態が残っていた場合、その直後の枝番が直前の号証へ誤ってぶら下がる。
+    const prevIsEvidenceEda=i>0&&prev&&prev.isEda&&!prev.seihon;
+
+    if(item.seihon){
+      // 正副本ファイル：証拠番号カウントをスキップし、枝番グループもここで途切れさせる
       out.push({main,eda:0,skip:true});
-    }else if(!files[i].isEda){
+    }else if(!item.isEda){
       // 通常ファイル：番号を進める
       main++;
       out.push({main,eda:0});
-    }else if(!prevIsEda||files[i].isEdaGroupStart){
+    }else if(!prevIsEvidenceEda||item.isEdaGroupStart){
       // 枝グループの最初 or 区切りフラグ：新しい幹番号を取得・edaStartから開始
       main++;
-      const es=parseInt(files[i].edaStart)||1;
+      const es=parseInt(item.edaStart)||1;
       out.push({main,eda:es});
     }else{
       // 枝グループの続き：同じmain番号・edaをインクリメント
-      out.push({main,eda:out[out.length-1].eda+1});
+      const prevOut=out[out.length-1];
+      const nextEda=prevOut&&prevOut.eda>0?prevOut.eda+1:1;
+      out.push({main,eda:nextEda});
     }
   }
   return out;
@@ -657,10 +664,21 @@ function toggleVertical(i){
 }
 function toggleSeihon(i,checked){
   files[i].seihon=checked?'正本':'';
+  if(checked){
+    // 正副本は証拠番号・枝番の対象外なので、枝番状態は明示的に解除する
+    files[i].isEda=false;
+    files[i].isEdaGroupStart=false;
+    files[i].edaStart=1;
+  }
   resetDone();refreshList();
 }
 function setSeihon(i,val){
   files[i].seihon=val;
+  if(val){
+    files[i].isEda=false;
+    files[i].isEdaGroupStart=false;
+    files[i].edaStart=1;
+  }
   resetDone();refreshList();
 }
 function setEdaStart(i,val){
@@ -699,7 +717,8 @@ function refreshList(){
     else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
     else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
     else right=`<span class="se">エラー</span>`;
-    const isFirstEda=item.isEda&&(i===0||!files[i-1].isEda||item.isEdaGroupStart); // 枝グループの先頭
+    const prevForEda=files[i-1];
+    const isFirstEda=item.isEda&&!item.seihon&&(i===0||!prevForEda||!prevForEda.isEda||prevForEda.seihon||item.isEdaGroupStart); // 枝グループの先頭
     const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
