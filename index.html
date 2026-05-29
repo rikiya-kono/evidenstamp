@@ -75,6 +75,12 @@ input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-
 .eb{background:none;border:.5px solid var(--border);border-radius:4px;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;color:var(--text2);padding:2px 5px;transition:all .12s;flex-shrink:0}
 .eb.active{background:#7a2018;border-color:#7a2018;color:#fff}
 .eb:disabled{opacity:.2;cursor:not-allowed}
+.num-override{display:flex;align-items:center;gap:3px;flex-shrink:0;border:.5px solid var(--border);border-radius:5px;background:var(--bg3);padding:1px 3px;transition:background .25s,border-color .25s}
+.num-override span{font-size:10px;color:var(--text3);white-space:nowrap}
+.num-override input{width:42px;background:none;border:none;outline:none;text-align:center;font-size:11px;font-family:inherit;color:var(--text);padding:1px 0}
+.num-override input::placeholder{color:var(--text5)}
+.num-override input.manual-active{font-weight:600;color:var(--err)}
+.num-override button{background:none;border:none;cursor:pointer;font-size:11px;line-height:1;color:var(--text5);font-family:inherit;padding:0 1px}
 .fr{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .fr button.rm{background:none;border:none;cursor:pointer;font-size:14px;color:var(--text5);padding:0;line-height:1;font-family:inherit}
 .fr a{font-size:12px;font-weight:500;color:#1d6eb5;text-decoration:none}
@@ -273,7 +279,7 @@ html:not(.dark) .toggle-thumb{background:#555}
     </div>
     <div class="flc-top">
       <span id="flabel" class="fc"></span>
-      <span class="fh">「枝」で枝番 · ドラッグで並び替え</span>
+      <span class="fh">「枝」で枝番 · 号欄で任意番号 · ドラッグで並び替え</span>
       <button class="fa" onclick="clearAll()">すべて削除</button>
     </div>
     <div id="fl"></div>
@@ -316,6 +322,8 @@ html:not(.dark) .toggle-thumb{background:#555}
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
           <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選んで入力しEnterを押すと、プルダウンに追加されて次回以降ワンクリックで呼び出せます。複数被告がいる場合の「乙A」「乙B」や「別紙」なども登録可能。追加済みのカスタム符号を選ぶと「削除」ボタンが表示されます。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">開始番号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">空欄のファイル行は、ここで設定した番号から自動的に連番を振ります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">任意番号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル行の「号」欄に数字を入れると、そのファイルの号証番号だけを上書きできます。空欄なら自動連番です。上書き後の次の空欄行は、上書き番号の続きから振られます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・mints・ハイフンの5種類から選択。ファイル名の形式とは独立して設定できます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。スタンプとは独立して設定できます。枝番がある場合、「枝番の」は甲1の1、「枝番ハイフン」は甲1-1形式になります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。mintsルールでは半角スペースが標準。</td></tr>
@@ -340,6 +348,7 @@ html:not(.dark) .toggle-thumb{background:#555}
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">その他の機能</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
           <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">並び替え</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各行左端の「☰」をドラッグして順序を変更できます。要素の上半分にドロップすると前に、下半分にドロップすると後ろに挿入されます。ファイルリスト右上の「番号順に整列」ボタンを押すと、ファイル名に含まれる数値（甲1_〇〇、甲2_△△など）を検出して自動的に並び替えます。並び替え後は再付与が必要です。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">番号上書き</td><td style="padding:5px 0;color:var(--text);line-height:1.6">通常は 1,2,3… と続きますが、各行の「号」欄に 5、17、21 などを入れると、1,2,3,5,6,17,21 のような飛び番号にもできます。入力欄横の×で自動連番に戻せます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">再付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「スタンプを付与する」はいつでも押し直し可能。設定変更後はそのまま押せば全ファイルを再処理します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">JPG・PNG</td><td style="padding:5px 0;color:var(--text);line-height:1.6">画像ファイルをそのままドロップするとA4サイズのPDFに自動変換してスタンプを付与します。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">白背景</td><td style="padding:5px 0;color:var(--text);line-height:1.6">スタンプの背景を白くします。カラー書面や写真に重なっても読みやすくなります。</td></tr>
@@ -532,6 +541,11 @@ function adj(d){
 }
 
 /* ── 付番ロジック ── */
+function parseManualMain(item){
+  const n=parseInt(item?.manualMain);
+  return Number.isFinite(n)&&n>0?Math.max(1,Math.min(999,n)):null;
+}
+
 function calcStamps(){
   const start=parseInt(v('start-num')||'1');
   let main=start-1;
@@ -539,27 +553,28 @@ function calcStamps(){
   for(let i=0;i<files.length;i++){
     const item=files[i];
     const prev=files[i-1];
+    const manualMain=parseManualMain(item);
     // 正副本ファイルは、証拠番号の連番だけでなく「枝番の連続判定」からも完全に除外する。
     // これを入れないと、正副本行にisEda状態が残っていた場合、その直後の枝番が直前の号証へ誤ってぶら下がる。
     const prevIsEvidenceEda=i>0&&prev&&prev.isEda&&!prev.seihon;
 
     if(item.seihon){
       // 正副本ファイル：証拠番号カウントをスキップし、枝番グループもここで途切れさせる
-      out.push({main,eda:0,skip:true});
+      out.push({main,eda:0,skip:true,manual:false});
     }else if(!item.isEda){
-      // 通常ファイル：番号を進める
-      main++;
-      out.push({main,eda:0});
-    }else if(!prevIsEvidenceEda||item.isEdaGroupStart){
-      // 枝グループの最初 or 区切りフラグ：新しい幹番号を取得・edaStartから開始
-      main++;
+      // 通常ファイル：空欄なら自動連番、入力ありならその番号で上書きし、以後の連番の基準も更新する
+      main=manualMain??(main+1);
+      out.push({main,eda:0,manual:manualMain!==null});
+    }else if(!prevIsEvidenceEda||item.isEdaGroupStart||manualMain!==null){
+      // 枝グループの最初・区切りフラグ・任意番号入力あり：新しい幹番号を取得してedaStartから開始
+      main=manualMain??(main+1);
       const es=parseInt(item.edaStart)||1;
-      out.push({main,eda:es});
+      out.push({main,eda:es,manual:manualMain!==null});
     }else{
       // 枝グループの続き：同じmain番号・edaをインクリメント
       const prevOut=out[out.length-1];
       const nextEda=prevOut&&prevOut.eda>0?prevOut.eda+1:1;
-      out.push({main,eda:nextEda});
+      out.push({main,eda:nextEda,manual:false});
     }
   }
   return out;
@@ -604,9 +619,9 @@ function outName(item,stamp){
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
-      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false,manualMain:null});
     else if(/image\/(jpeg|png)/.test(f.type))
-      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false,manualMain:null});
   }
   document.getElementById('fi').value='';
   refreshUI();
@@ -669,6 +684,7 @@ function toggleSeihon(i,checked){
     files[i].isEda=false;
     files[i].isEdaGroupStart=false;
     files[i].edaStart=1;
+    files[i].manualMain=null;
   }
   resetDone();refreshList();
 }
@@ -678,7 +694,17 @@ function setSeihon(i,val){
     files[i].isEda=false;
     files[i].isEdaGroupStart=false;
     files[i].edaStart=1;
+    files[i].manualMain=null;
   }
+  resetDone();refreshList();
+}
+function setManualMain(i,val){
+  const n=parseInt(val);
+  files[i].manualMain=Number.isFinite(n)&&n>0?Math.max(1,Math.min(999,n)):null;
+  resetDone();refreshList();
+}
+function clearManualMain(i){
+  files[i].manualMain=null;
   resetDone();refreshList();
 }
 function setEdaStart(i,val){
@@ -718,8 +744,10 @@ function refreshList(){
     else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
     else right=`<span class="se">エラー</span>`;
     const prevForEda=files[i-1];
-    const isFirstEda=item.isEda&&!item.seihon&&(i===0||!prevForEda||!prevForEda.isEda||prevForEda.seihon||item.isEdaGroupStart); // 枝グループの先頭
-    const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
+    const hasManualMain=parseManualMain(item)!==null;
+    const isFirstEda=item.isEda&&!item.seihon&&(i===0||!prevForEda||!prevForEda.isEda||prevForEda.seihon||item.isEdaGroupStart||hasManualMain); // 枝グループの先頭
+    const manualNumInput=!item.seihon?`<div class="num-override" title="任意番号。空欄なら開始番号からの自動連番"><span>号</span><input type="number" min="1" max="999" placeholder="自動" value="${item.manualMain||''}" class="${hasManualMain?'manual-active':''}" onchange="setManualMain(${i},this.value)" onkeydown="if(event.key==='Enter')this.blur()">${hasManualMain?`<button type="button" onclick="clearManualMain(${i})" title="自動連番に戻す">×</button>`:''}</div>`:'';
+    const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:var(--bg3);border:.5px solid var(--border);border-radius:4px;padding:2px 3px;font-family:inherit;color:var(--text)" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
     el.className='file-row';el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
@@ -729,6 +757,7 @@ function refreshList(){
         <div class="fi-orig">${item.file.name}${item.isImg?' → .pdf':''}</div>
         <div class="fi-new">→ ${nn}</div>
       </div>
+      ${manualNumInput}
       ${edaStartInput}
       <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})">枝</button>
       <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
@@ -1077,10 +1106,12 @@ async function downloadZip(){
 }
 
 function findGroupEnd(startIdx,raw){
+  if(!raw[startIdx]||raw[startIdx].skip||raw[startIdx].eda<=0)return startIdx;
   const m=raw[startIdx].main;
   let end=startIdx;
   for(let j=startIdx+1;j<files.length;j++){
-    if(raw[j].main===m)end=j;else break;
+    if(raw[j]&&!raw[j].skip&&raw[j].main===m&&raw[j].eda>0)end=j;
+    else break;
   }
   return end;
 }
