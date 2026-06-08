@@ -45,8 +45,12 @@ h1{font-size:21px;font-weight:600;margin-bottom:4px}
 .num-grp button{background:none;border:none;cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;color:var(--text2);font-family:inherit}
 .num-grp input{width:40px;text-align:center;background:none;border:none;outline:none;font-size:14px;font-weight:500;font-family:inherit;color:var(--text)}
 select{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);cursor:pointer;outline:none;font-family:inherit;transition:background .25s,border-color .25s}
-.sym-custom{border:.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;width:80px;color:var(--text);background:var(--bg3);transition:background .25s}
+.sym-custom{border:.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;width:80px;color:var(--text);background:var(--bg3);transition:background .25s,opacity .15s,border-color .25s}
 .sym-custom:focus{border-color:#999}
+.sym-custom:disabled{opacity:.45;cursor:not-allowed;color:var(--text5)}
+.sym-custom:disabled::placeholder{color:var(--text5)}
+#csym-add{transition:opacity .15s,background .25s,border-color .25s;cursor:pointer}
+#csym-add:disabled{opacity:.45;cursor:not-allowed}
 .divider{border:none;border-top:.5px solid var(--border3);margin:12px 0}
 input[type=number].sm{width:52px;background:var(--bg3);border:.5px solid var(--border);border-radius:6px;padding:5px 7px;font-size:13px;font-family:inherit;outline:none;color:var(--text);text-align:center;transition:background .25s}
 input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;background:var(--bg3);flex-shrink:0}
@@ -161,8 +165,8 @@ html:not(.dark) .toggle-thumb{background:#555}
             <option value="__c__">カスタム...</option>
           </select>
           <div style="display:flex;gap:4px;align-items:center">
-            <input type="text" id="csym" class="sym-custom" placeholder="例：乙A（Enterで追加）" oninput="onCsymInput()" onkeydown="if(event.key==='Enter')addCustomSym()" maxlength="10" style="display:none">
-            <button id="csym-add" onclick="addCustomSym()" style="display:none;font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">追加</button>
+            <input type="text" id="csym" class="sym-custom" placeholder="カスタム選択時に入力" oninput="onCsymInput()" onkeydown="if(event.key==='Enter')addCustomSym()" maxlength="10" disabled>
+            <button id="csym-add" onclick="addCustomSym()" disabled style="font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);font-family:inherit">追加</button>
             <button id="csym-del" onclick="delCustomSym()" style="display:none;font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--err);cursor:pointer;font-family:inherit">削除</button>
           </div>
         </div>
@@ -191,8 +195,8 @@ html:not(.dark) .toggle-thumb{background:#555}
           <option value="mints" selected>甲001（mints推奨）</option>
           <option value="formal">甲第1号証（正式）</option>
           <option value="gocho">甲1号証（「第」省略）</option>
-          <option value="hyphen">甲1（枝番ハイフン）</option>
           <option value="simple">甲1（枝番「の」）</option>
+          <option value="hyphen">甲1（枝番ハイフン）</option>
         </select>
       </div>
       <div class="field" id="sep-field">
@@ -314,7 +318,7 @@ html:not(.dark) .toggle-thumb{background:#555}
       <section>
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
-          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選んで入力しEnterを押すと、プルダウンに追加されて次回以降ワンクリックで呼び出せます。複数被告がいる場合の「乙A」「乙B」や「別紙」なども登録可能。追加済みのカスタム符号を選ぶと「削除」ボタンが表示されます。</td></tr>
+          <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選ぶと入力欄と「追加」ボタンが有効になり、入力してEnterまたは「追加」を押すと、プルダウンに追加されて次回以降ワンクリックで呼び出せます。複数被告がいる場合の「乙A」「乙B」や「別紙」なども登録可能。追加済みのカスタム符号を選ぶと「削除」ボタンが表示されます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・ハイフンの4種類から選択。符号に応じて表示例が切り替わります。符号で「資料」を選んだ場合は、「資料1（枝番「の」）」形式が自動選択されます。ファイル名の形式とは独立して設定できます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。符号に応じて表示例が切り替わります。スタンプとは独立して設定できます。枝番がある場合、「枝番の」は甲1の1、「枝番ハイフン」は甲1-1形式になります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。選択中のファイル名形式・符号に応じて表示例が切り替わります。mintsルールでは半角スペースが標準。</td></tr>
@@ -516,19 +520,29 @@ function onCsymInput(){
   updateStyleOptionLabels();
   refreshList();
 }
-function onSymSel(){
+function updateCustomSymControls(){
   const val=v('sym-sel');
   const isInput=val==='__c__';
   const isCustom=val&&val.startsWith('__custom__');
-  document.getElementById('csym').style.display=isInput?'':'none';
-  document.getElementById('csym-add').style.display=isInput?'':'none';
-  document.getElementById('csym-del').style.display=isCustom?'':'none';
+  const csym=document.getElementById('csym');
+  const add=document.getElementById('csym-add');
+  const del=document.getElementById('csym-del');
+  if(csym){
+    csym.disabled=!isInput;
+    csym.placeholder=isInput?'例：乙A（Enterで追加）':'カスタム選択時に入力';
+  }
+  if(add)add.disabled=!isInput;
+  if(del)del.style.display=isCustom?'':'none';
+}
+function onSymSel(){
+  updateCustomSymControls();
   normalizeStampStyle();
   updateStyleOptionLabels();
   refreshList();
 }
 function addCustomSym(){
-  const val=document.getElementById('csym').value.trim();
+  const input=document.getElementById('csym');
+  const val=input.value.trim();
   if(!val)return;
   const fixed=['甲','乙','丙','弁','資料','疎甲','疎乙'];
   const customs=getCustomSyms();
@@ -537,11 +551,9 @@ function addCustomSym(){
   saveCustomSyms(customs);
   buildSymOptions();
   document.getElementById('sym-sel').value='__custom__'+val;
-  document.getElementById('csym').style.display='none';
-  document.getElementById('csym-add').style.display='none';
-  document.getElementById('csym-del').style.display='block';
-  updateStyleOptionLabels();
-  refreshList();save();
+  input.value='';
+  onSymSel();
+  save();
 }
 function delCustomSym(){
   const val=v('sym-sel');
@@ -550,9 +562,8 @@ function delCustomSym(){
   saveCustomSyms(getCustomSyms().filter(c=>c!==sym));
   buildSymOptions();
   document.getElementById('sym-sel').value='甲';
-  document.getElementById('csym-del').style.display='none';
-  updateStyleOptionLabels();
-  refreshList();save();
+  onSymSel();
+  save();
 }
 function saveMyDefault(){
   try{
@@ -1165,6 +1176,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadSettings();
   normalizeStampStyle();
   updateStyleOptionLabels();
+  updateCustomSymControls();
 });
 </script>
 </body>
