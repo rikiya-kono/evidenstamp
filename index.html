@@ -44,7 +44,9 @@ h1{font-size:21px;font-weight:600;margin-bottom:4px}
 .num-grp{display:flex;align-items:center;background:var(--bg3);border-radius:7px;padding:2px 4px;border:.5px solid var(--border);transition:background .25s}
 .num-grp button{background:none;border:none;cursor:pointer;font-size:17px;line-height:1;padding:2px 5px;color:var(--text2);font-family:inherit}
 .num-grp input{width:40px;text-align:center;background:none;border:none;outline:none;font-size:14px;font-weight:500;font-family:inherit;color:var(--text)}
-select{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);cursor:pointer;outline:none;font-family:inherit;transition:background .25s,border-color .25s}
+select{background:var(--bg3);border:.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);cursor:pointer;outline:none;font-family:inherit;transition:background .25s,border-color .25s;min-width:0}
+#stamp-style,#name-style{width:150px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#separator{width:205px;max-width:205px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sym-custom{border:.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;width:80px;color:var(--text);background:var(--bg3);transition:background .25s,opacity .15s,border-color .25s}
 .sym-custom:focus{border-color:#999}
 .sym-custom:disabled{opacity:.45;cursor:not-allowed;color:var(--text5)}
@@ -131,6 +133,42 @@ html.dark .toggle-track{background:#3a3a50;border-color:#4a4a65}
 }
 html.dark .toggle-thumb{transform:translateX(18px);background:var(--text)}
 html:not(.dark) .toggle-thumb{background:#555}
+
+/* ─── UX improvements ─── */
+.out-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--bg3);border:.5px solid var(--border3);border-radius:8px;padding:10px 12px;margin-top:12px}
+.out-preview .op-item{min-width:0}
+.out-preview .op-label{font-size:10px;color:var(--text3);letter-spacing:.04em;margin-bottom:3px}
+.out-preview .op-val{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.adv-settings{margin-top:12px;border-top:.5px solid var(--border3);padding-top:10px}
+.adv-settings summary{cursor:pointer;list-style:none;font-size:11px;color:var(--text2);font-weight:500;display:inline-flex;align-items:center;gap:6px;user-select:none}
+.adv-settings summary::-webkit-details-marker{display:none}
+.adv-settings summary::before{content:'＋';font-size:12px;color:var(--text3)}
+.adv-settings[open] summary::before{content:'−'}
+#dropzone.compact{padding:12px 16px}
+#dropzone.compact .dz-t{font-size:13px;margin-bottom:0}
+#dropzone.compact .dz-s{display:none}
+.file-row.eda-member{border-left:3px solid var(--ins-line);padding-left:7px}
+.file-row.eda-member .fi-new{color:var(--text)}
+.needs{font-size:11px;color:#C27803}
+html.dark .needs{color:#F4B84A}
+#aw{position:sticky;bottom:12px;z-index:30;align-items:center;background:color-mix(in srgb,var(--panel-bg) 92%,transparent);backdrop-filter:blur(10px);border:.5px solid var(--border2);border-radius:10px;padding:8px;box-shadow:0 8px 28px rgba(0,0,0,.12)}
+#action-info{font-size:11px;color:var(--text3);white-space:nowrap;padding:0 6px}
+.preview-panel{display:none;background:var(--panel-bg);border:.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:background .25s,border-color .25s}
+.preview-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.preview-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-tools{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.preview-tools button{font-size:11px;padding:3px 8px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit}
+.preview-tools button:disabled{opacity:.4;cursor:not-allowed}
+#preview-canvas-wrap{background:var(--bg3);border:.5px solid var(--border3);border-radius:8px;padding:10px;overflow:hidden}
+#preview-frame{width:100%;height:72vh;border:0;background:#fff;border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.14)}
+#preview-empty{font-size:12px;color:var(--text3);padding:24px 8px;text-align:center}
+.file-tools{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.preview-btn{background:none;border:.5px solid var(--border);border-radius:4px;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;color:var(--text2);padding:2px 5px;transition:all .12s;flex-shrink:0}
+.preview-btn.active{background:var(--btn-bg);border-color:var(--btn-bg);color:var(--btn-text)}
+.undo-toast{display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;background:var(--panel-bg);color:var(--text);border:.5px solid var(--border2);border-radius:999px;padding:9px 12px;box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:12px;align-items:center;gap:10px}
+.undo-toast button{border:none;background:none;color:#1d6eb5;cursor:pointer;font-family:inherit;font-weight:600;font-size:12px}
+@media(max-width:720px){.out-preview{grid-template-columns:1fr}#aw{bottom:8px}.preview-head{align-items:flex-start;flex-direction:column}.preview-tools{width:100%;justify-content:flex-end}#stamp-style,#name-style,#separator{width:100%;max-width:100%}}
+
 </style>
 </head>
 <body>
@@ -174,15 +212,16 @@ html:not(.dark) .toggle-thumb{background:#555}
       <div class="field">
         <div class="fl">開始番号</div>
         <div class="num-grp">
-          <button onclick="adj(-1)">−</button>
-          <input type="number" id="start-num" value="1" min="1" max="999" onchange="refreshList();save()">
-          <button onclick="adj(1)">+</button>
+          <button id="start-dec" onclick="adj(-1)">−</button>
+          <input type="number" id="start-num" value="1" min="1" max="999" onchange="markNeedsRestamp();save()">
+          <button id="start-inc" onclick="adj(1)">+</button>
         </div>
+        <label class="chk" style="padding-bottom:0;margin-top:2px" title="PDF上のスタンプとファイル名先頭を、番号なしの符号のみ（例：資料）にします"><input type="checkbox" id="no-stamp-number" onchange="onNoStampNumber();save()"> 番号なし</label>
       </div>
 
       <div class="field">
         <div class="fl">スタンプの形式</div>
-        <select id="stamp-style" onchange="refreshList();save()">
+        <select id="stamp-style" onchange="markNeedsRestamp();save()">
           <option value="formal" selected>甲第1号証（正式）</option>
           <option value="gocho">甲1号証（「第」省略）</option>
           <option value="simple">甲1（枝番「の」）</option>
@@ -216,33 +255,35 @@ html:not(.dark) .toggle-thumb{background:#555}
       </div>
     </div>
 
-    <hr class="divider">
-    <div class="ptitle" style="margin-bottom:8px">スタンプ設定</div>
+    <details class="adv-settings">
+      <summary>詳細設定</summary>
+      <hr class="divider">
+      <div class="ptitle" style="margin-bottom:8px">スタンプ設定</div>
     <div class="row">
       <div class="field">
         <div class="fl">フォントサイズ (px)</div>
-        <input type="number" class="sm" id="stamp-size" value="14" min="8" max="40" onchange="save()">
+        <input type="number" class="sm" id="stamp-size" value="20" min="8" max="40" onchange="markNeedsRestamp();save()">
       </div>
       <div class="field">
         <div class="fl">文字色</div>
-        <input type="color" id="stamp-color" value="#BF3528" onchange="save()">
+        <input type="color" id="stamp-color" value="#000000" onchange="markNeedsRestamp();save()">
       </div>
       <div class="field">
         <div class="fl">右端余白 (pt)</div>
-        <input type="number" class="sm" id="margin-r" value="14" min="0" max="300" onchange="save()">
+        <input type="number" class="sm" id="margin-r" value="30" min="0" max="300" onchange="markNeedsRestamp();save()">
       </div>
       <div class="field">
         <div class="fl">上端余白 (pt)</div>
-        <input type="number" class="sm" id="margin-t" value="14" min="0" max="300" onchange="save()">
+        <input type="number" class="sm" id="margin-t" value="50" min="0" max="300" onchange="markNeedsRestamp();save()">
       </div>
       <div class="field" style="justify-content:flex-end">
-        <label class="chk"><input type="checkbox" id="stamp-bg" onchange="save()"> 白背景</label>
+        <label class="chk"><input type="checkbox" id="stamp-bg" onchange="markNeedsRestamp();save()"> 白背景</label>
       </div>
       <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="stamp-vertical" onchange="applyVerticalAll();save()"> まとめて縦書き</label>
       </div>
       <div class="field" style="justify-content:flex-end">
-        <label class="chk"><input type="checkbox" id="page-num" onchange="save()"> ページ番号付与</label>
+        <label class="chk"><input type="checkbox" id="page-num" onchange="markNeedsRestamp();save()"> ページ番号付与</label>
       </div>
     </div>
 
@@ -250,15 +291,25 @@ html:not(.dark) .toggle-thumb{background:#555}
     <div class="ptitle" style="margin-bottom:8px">出力設定</div>
     <div class="row">
       <div class="field" style="justify-content:flex-end">
-        <label class="chk"><input type="checkbox" id="del-meta" onchange="save()"> メタデータ削除</label>
+        <label class="chk"><input type="checkbox" id="del-meta" onchange="markNeedsRestamp();save()"> メタデータ削除</label>
       </div>
       <div class="field" style="justify-content:flex-end">
         <label class="chk"><input type="checkbox" id="merge-eda" onchange="save()"> 枝番グループを結合</label>
       </div>
+      <div class="field" style="justify-content:flex-end">
+        <label class="chk"><input type="checkbox" id="force-a4" onchange="markNeedsRestamp();save()"> PDFをA4に統一</label>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
-      <button onclick="saveMyDefault()" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">現在の設定をマイデフォルトに保存</button>
-      <button onclick="loadMyDefault()" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">マイデフォルトに戻す</button>
+      <button onclick="saveMyDefault()" title="現在の設定を次回以降の既定値として保存します" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">既定に保存</button>
+      <button onclick="loadMyDefault()" title="保存済みの既定値に戻します" style="font-size:11px;padding:4px 12px;border:.5px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text2);cursor:pointer;font-family:inherit">既定に戻す</button>
+    </div>
+    </details>
+
+    <div class="out-preview" aria-live="polite">
+      <div class="op-item"><div class="op-label">PDF上の表示</div><div class="op-val" id="preview-stamp-label">甲第1号証</div></div>
+      <div class="op-item"><div class="op-label">ファイル名</div><div class="op-val" id="preview-name-label">甲001_書類名.pdf</div></div>
+      <div class="op-item"><div class="op-label">枝番例</div><div class="op-val" id="preview-eda-label">甲第1号証の1 / 甲001-1</div></div>
     </div>
   </div>
 
@@ -282,12 +333,26 @@ html:not(.dark) .toggle-thumb{background:#555}
     <div id="fl"></div>
   </div>
 
+  <div id="pdf-preview" class="preview-panel">
+    <div class="preview-head">
+      <div class="preview-title" id="preview-title">PDFプレビュー</div>
+      <div class="preview-tools">
+        <button onclick="closePreview()">閉じる</button>
+      </div>
+    </div>
+    <div id="preview-canvas-wrap">
+      <div id="preview-empty">ファイル行の「プレビュー」を押すと、その時点の設定でスタンプを付与して確認できます。</div>
+      <iframe id="preview-frame" title="PDFプレビュー" style="display:none"></iframe>
+    </div>
+  </div>
+
   <div id="pw">
     <div id="pt"></div>
     <div class="pb-wrap"><div id="pb"></div></div>
   </div>
 
   <div id="aw">
+    <span id="action-info">0 ファイル</span>
     <button id="pbtn" onclick="processAll()" style="flex:1">スタンプを付与する</button>
     <button id="zbtn" onclick="downloadZip()">ZIP でまとめてDL</button>
   </div>
@@ -319,9 +384,9 @@ html:not(.dark) .toggle-thumb{background:#555}
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">基本設定</div>
         <table style="font-size:13px;width:100%;border-collapse:collapse">
           <tr><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">符号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">甲・乙・丙・弁・資料・疎甲・疎乙から選択。「カスタム...」を選ぶと入力欄と「追加」ボタンが有効になり、入力してEnterまたは「追加」を押すと、プルダウンに追加されて次回以降ワンクリックで呼び出せます。複数被告がいる場合の「乙A」「乙B」や「別紙」なども登録可能。追加済みのカスタム符号を選ぶと「削除」ボタンが表示されます。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・ハイフンの4種類から選択。符号に応じて表示例が切り替わります。符号で「資料」を選んだ場合は、「資料1（枝番「の」）」形式が自動選択されます。ファイル名の形式とは独立して設定できます。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。符号に応じて表示例が切り替わります。スタンプとは独立して設定できます。枝番がある場合、「枝番の」は甲1の1、「枝番ハイフン」は甲1-1形式になります。</td></tr>
-          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号と書類名の間の区切り。選択中のファイル名形式・符号に応じて表示例が切り替わります。mintsルールでは半角スペースが標準。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">スタンプの形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">PDF上に押されるスタンプの形式。正式（甲第1号証）・号証・シンプル・ハイフンの4種類から選択。符号に応じて表示例が切り替わります。符号で「資料」を選んだ場合は、「資料1（枝番「の」）」形式が自動選択されます。番号を付けない場合は、開始番号付近の「番号なし」を使用します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名の形式</td><td style="padding:5px 0;color:var(--text);line-height:1.6">リネーム後のファイル名に使われる形式。mints形式（甲001）が標準。符号に応じて表示例が切り替わります。通常時はスタンプとは独立して設定できます。枝番がある場合、「枝番の」は甲1の1、「枝番ハイフン」は甲1-1形式になります。番号なしをオンにした場合は、PDF上のスタンプだけでなくファイル名の先頭も「資料」「甲」などの符号のみになります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号または符号と書類名の間の区切り。選択中のファイル名形式・符号に応じて表示例が切り替わります。番号なしの場合は「資料_書類名.pdf」のように元のファイル名を維持したまま、符号のみを先頭に付けます。mintsルールでは半角スペースが標準。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名変更</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックを外すとファイル名はそのままでスタンプのみ付与します。オフにするとファイル名の形式・区切り文字・元のファイル名を削除の設定がすべて無効になります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">元のファイル名を削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックをオンにすると「甲001.pdf」のように番号だけのファイル名になります。オンのときは区切り文字の設定が無効になります。</td></tr>
         </table>
@@ -349,6 +414,7 @@ html:not(.dark) .toggle-thumb{background:#555}
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">縦書きスタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">縦書き文書用にスタンプテキストを縦組みで描画します。連続する数字は1スロットにまとめて表示されます（「12」が縦に並んでも崩れません）。「まとめて縦書き」で全ファイルに適用、各ファイル行の「縦」ボタンで個別設定も可能です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">正副本スタンプ</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各ファイル行のチェックをオンにすると正本・副本・控えのプルダウンが有効になります。正副本チェック済みファイルは証拠番号スタンプなしで左上に正副本スタンプのみ付与され、証拠番号の連番からも除外されます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ページ番号付与</td><td style="padding:5px 0;color:var(--text);line-height:1.6">各PDFの全ページ下部中央に「1 / 3」形式のページ番号を追加します。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">PDFをA4に統一</td><td style="padding:5px 0;color:var(--text);line-height:1.6">出力PDFの各ページをA4サイズに収めます。横長ページは横向きA4として扱い、縦横比を維持して中央配置します。mints等で「A4サイズでない」と出るPDFの回避用です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">枝番グループを結合</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ZIPダウンロード時に同じ号証番号のグループを1つのPDFにまとめます。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">マイデフォルト</td><td style="padding:5px 0;color:var(--text);line-height:1.6">「現在の設定をマイデフォルトに保存」で全設定を登録。「マイデフォルトに戻す」で呼び出せます。よく使う符号・スタイルを登録しておくと便利です。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">メタデータ削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">出力PDFから作成者・更新日時などのプロパティ情報を削除します。</td></tr>
@@ -361,7 +427,8 @@ html:not(.dark) .toggle-thumb{background:#555}
 </div>
 
 <script>
-let files=[], dragSrcIdx=null;
+let files=[], dragSrcIdx=null, lastClearedFiles=null, clearUndoTimer=null;
+let previewState={idx:null,url:null,tempUrl:null,loading:false};
 
 function stampComplete(){
   const pb=document.getElementById('pb');
@@ -410,19 +477,22 @@ function burst(x,y){
 }
 function clearInsertMarkers(){document.querySelectorAll('.file-row').forEach(r=>{r.classList.remove('drag-insert-before','drag-insert-after');delete r.dataset.insertBefore;});}
 const SK='koc2_settings';
+const SETTINGS_VERSION=4;
 
 /* ── 設定保存・復元 ── */
 function save(){
   try{
     localStorage.setItem(SK,JSON.stringify({
+      settingsVersion:SETTINGS_VERSION,
       symSel:v('sym-sel'),csym:v('csym'),
       startNum:v('start-num'),
       stampStyle:v('stamp-style'),nameStyle:v('name-style'),separator:v('separator'),
+      noStampNumber:c('no-stamp-number'),
       renameFile:c('rename-file'),stripName:c('strip-name'),
       stampSize:v('stamp-size'),stampColor:v('stamp-color'),
       marginR:v('margin-r'),marginT:v('margin-t'),
       stampBg:c('stamp-bg'),stampVertical:c('stamp-vertical'),delMeta:c('del-meta'),
-      pageNum:c('page-num'),mergeEda:c('merge-eda'),
+      pageNum:c('page-num'),mergeEda:c('merge-eda'),forceA4:c('force-a4'),
     }));
   }catch(e){}
 }
@@ -430,21 +500,102 @@ function loadSettings(){
   try{
     const s=JSON.parse(localStorage.getItem(SK));
     if(!s)return;
+    let migrated=false;
+    if((Number(s.settingsVersion)||0)<2){
+      // 旧標準値（14/14/14）のまま保存されている場合だけ、新標準値へ移行する。
+      if(String(s.stampSize)==='14'&&String(s.marginR)==='14'&&String(s.marginT)==='14'){
+        s.stampSize='20';s.marginR='30';s.marginT='50';migrated=true;
+      }
+    }
+    if((Number(s.settingsVersion)||0)<3){
+      // 旧標準色（赤）のまま保存されている場合だけ、新標準色（黒）へ移行する。
+      if(!s.stampColor||String(s.stampColor).toLowerCase()==='#bf3528'){
+        s.stampColor='#000000';migrated=true;
+      }
+    }
     const set=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).value=val;};
     const chk=(id,val)=>{if(val!==undefined&&document.getElementById(id))document.getElementById(id).checked=!!val;};
     set('sym-sel',s.symSel);set('csym',s.csym);
     set('start-num',s.startNum);
-    set('stamp-style',(s.stampStyle==='mints')?'formal':(s.stampStyle||s.numStyle));set('name-style',s.nameStyle);set('separator',s.separator);
+    const oldSymbolOnly=s.stampStyle==='symbol'||s.nameStyle==='symbol';
+    let restoredStampStyle=(s.stampStyle==='mints'||s.stampStyle==='symbol')?'formal':(s.stampStyle||s.numStyle);
+    if((!s.stampStyle||s.stampStyle==='mints')&&(s.symSel==='資料'))restoredStampStyle='simple';
+    const restoredNameStyle=s.nameStyle==='symbol'?'mints':s.nameStyle;
+    set('stamp-style',restoredStampStyle);set('name-style',restoredNameStyle);set('separator',s.separator);
     chk('rename-file',s.renameFile);chk('strip-name',s.stripName);
     set('stamp-size',s.stampSize);set('stamp-color',s.stampColor);
     set('margin-r',s.marginR);set('margin-t',s.marginT);
     chk('stamp-bg',s.stampBg);chk('stamp-vertical',s.stampVertical);chk('del-meta',s.delMeta);
-    chk('page-num',s.pageNum);chk('merge-eda',s.mergeEda);
-    normalizeStampStyle();updateStyleOptionLabels();onSymSel();onRenameFile();onStripName();
+    chk('page-num',s.pageNum);chk('merge-eda',s.mergeEda);chk('force-a4',s.forceA4);chk('no-stamp-number',s.noStampNumber||oldSymbolOnly);
+    normalizeStampStyle();updateStyleOptionLabels();updateNoStampNumberControls();onSymSel({preserveStampStyle:true});onRenameFile();onStripName();
+    if(migrated)save();
   }catch(e){}
 }
 function v(id){return document.getElementById(id)?.value;}
 function c(id){return document.getElementById(id)?.checked;}
+function escHtml(str){return String(str??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function escAttr(str){return escHtml(str);}
+
+function sampleOutName(stamp){
+  if(!c('rename-file'))return '書類名.pdf';
+  if(c('strip-name'))return `${stamp}.pdf`;
+  const sep=v('separator');
+  if(sep==='kakko')return `【${stamp}】書類名.pdf`;
+  if(sep==='paren')return `(${stamp})書類名.pdf`;
+  return `${stamp}${sep==='space'?' ':'_'}書類名.pdf`;
+}
+function updateOutputPreview(){
+  const sym=getSym();
+  const stamp=c('no-stamp-number')?sym:_fmt(v('stamp-style')||'formal',1,0,sym);
+  const name=c('no-stamp-number')?sym:_fmt(v('name-style')||'mints',1,0,sym);
+  const edaStamp=c('no-stamp-number')?sym:_fmt(v('stamp-style')||'formal',1,1,sym);
+  const edaName=c('no-stamp-number')?sym:_fmt(v('name-style')||'mints',1,1,sym);
+  const a=document.getElementById('preview-stamp-label');
+  const b=document.getElementById('preview-name-label');
+  const d=document.getElementById('preview-eda-label');
+  if(a)a.textContent=stamp;
+  if(b)b.textContent=sampleOutName(name);
+  if(d)d.textContent=`${edaStamp} / ${edaName}`;
+}
+function updateNoStampNumberControls(){
+  const noNum=c('no-stamp-number');
+  ['start-num','start-dec','start-inc','stamp-style','name-style'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.disabled=!!noNum;
+  });
+  const ng=document.querySelector('.num-grp');
+  if(ng){ng.style.opacity=noNum?'0.45':'1';ng.style.pointerEvents=noNum?'none':'auto';}
+  ['stamp-style','name-style'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.opacity=noNum?'0.45':'1';el.style.pointerEvents=noNum?'none':'auto';}
+  });
+}
+function onNoStampNumber(){
+  updateNoStampNumberControls();
+  updateStyleOptionLabels();
+  markNeedsRestamp();
+}
+function markNeedsRestamp(){
+  resetDone();
+  refreshList();
+  refreshPreviewIfNeeded();
+}
+function updateActionInfo(){
+  const el=document.getElementById('action-info');
+  if(!el)return;
+  const total=files.length;
+  const done=files.filter(f=>f.status==='done').length;
+  const stale=files.filter(f=>f.status==='stale').length;
+  el.textContent=stale?`${total} ファイル · ${stale} 件要再付与`:`${total} ファイル · 完了 ${done}/${total}`;
+}
+function setDropzoneCompact(){
+  const dz=document.getElementById('dropzone');
+  if(!dz)return;
+  dz.classList.toggle('compact',files.length>0);
+  const t=dz.querySelector('.dz-t');
+  if(t)t.textContent=files.length>0?'PDF・画像を追加する':'PDFをドロップ、またはクリックして選択';
+}
+
 
 function setOptionText(selectId,value,text){
   const sel=document.getElementById(selectId);
@@ -461,12 +612,14 @@ function normalizeStampStyle(){
   const ss=document.getElementById('stamp-style');
   if(!ss)return;
   removeOption('stamp-style','mints');
-  if(getSym()==='資料')ss.value='simple';
+  removeOption('stamp-style','symbol');
   if(!ss.value||ss.value==='mints')ss.value='formal';
 }
 function updateStyleOptionLabels(){
   const sym=getSym();
   removeOption('stamp-style','mints');
+  removeOption('stamp-style','symbol');
+  removeOption('name-style','symbol');
 
   setOptionText('stamp-style','formal',`${sym}第1号証（正式）`);
   setOptionText('stamp-style','gocho',`${sym}1号証（「第」省略）`);
@@ -480,7 +633,7 @@ function updateStyleOptionLabels(){
   setOptionText('name-style','simple',`${sym}1（枝番「の」）`);
 
   const nameStyle=v('name-style')||'mints';
-  const prefix=_fmt(nameStyle,1,0,sym);
+  const prefix=c('no-stamp-number')?sym:_fmt(nameStyle,1,0,sym);
   setOptionText('separator','space',`半角スペース　${prefix} 書類名`);
   setOptionText('separator','underscore',`アンダーバー　${prefix}_書類名`);
   setOptionText('separator','kakko',`隅付き括弧　【${prefix}】書類名`);
@@ -518,7 +671,7 @@ function getSym(){
 function onCsymInput(){
   normalizeStampStyle();
   updateStyleOptionLabels();
-  refreshList();
+  markNeedsRestamp();
 }
 function updateCustomSymControls(){
   const val=v('sym-sel');
@@ -534,11 +687,13 @@ function updateCustomSymControls(){
   if(add)add.disabled=!isInput;
   if(del)del.style.display=isCustom?'':'none';
 }
-function onSymSel(){
+function onSymSel(opts={}){
   updateCustomSymControls();
   normalizeStampStyle();
+  const ss=document.getElementById('stamp-style');
+  if(!opts.preserveStampStyle&&getSym()==='資料'&&ss)ss.value='simple';
   updateStyleOptionLabels();
-  refreshList();
+  markNeedsRestamp();
 }
 function addCustomSym(){
   const input=document.getElementById('csym');
@@ -585,9 +740,10 @@ function loadMyDefault(){
 }
 
 function adj(d){
+  if(c('no-stamp-number'))return;
   const i=document.getElementById('start-num');
   i.value=Math.max(1,Math.min(999,(parseInt(i.value)||1)+d));
-  refreshList();save();
+  markNeedsRestamp();save();
 }
 
 /* ── 付番ロジック ── */
@@ -625,6 +781,7 @@ function calcStamps(){
 }
 
 function _fmt(s,main,eda,t){
+  if(s==='symbol')return `${t}`;
   const dash=s==='mints'||s==='hyphen';
   let base;
   if(s==='mints')base=`${t}${String(main).padStart(3,'0')}`;
@@ -634,8 +791,8 @@ function _fmt(s,main,eda,t){
   if(eda>0)base+=dash?`-${eda}`:`の${eda}`;
   return base;
 }
-function fmtStamp(main,eda){return _fmt(v('stamp-style'),main,eda,getSym());}
-function fmtName(main,eda){return _fmt(v('name-style'),main,eda,getSym());}
+function fmtStamp(main,eda){return c('no-stamp-number')?getSym():_fmt(v('stamp-style'),main,eda,getSym());}
+function fmtName(main,eda){return c('no-stamp-number')?getSym():_fmt(v('name-style'),main,eda,getSym());}
 
 function getStamps(){return calcStamps().map(({main,eda,skip})=>skip?'':fmtStamp(main,eda));}
 function getNames(){return calcStamps().map(({main,eda,skip})=>skip?'':fmtName(main,eda));}
@@ -688,38 +845,63 @@ function sortByFileName(){
     if(na!==nb)return na-nb;
     return a.file.name.localeCompare(b.file.name);
   });
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 
 function clearAll(){
-  files.forEach(f=>{if(f.url)URL.revokeObjectURL(f.url);});
+  if(!files.length)return;
+  if(clearUndoTimer)clearTimeout(clearUndoTimer);
+  lastClearedFiles=files.slice();
   files=[];
-  ['flc','aw','pw'].forEach(id=>document.getElementById(id).style.display='none');
+  closePreview();
+  ['flc','aw','pw','pdf-preview'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  setDropzoneCompact();
+  updateActionInfo();
+  const toast=document.getElementById('undo-toast');
+  if(toast)toast.style.display='flex';
+  clearUndoTimer=setTimeout(()=>{
+    if(lastClearedFiles){lastClearedFiles.forEach(f=>{if(f.url)URL.revokeObjectURL(f.url);});}
+    lastClearedFiles=null;
+    const t=document.getElementById('undo-toast');if(t)t.style.display='none';
+  },8000);
+}
+function undoClearAll(){
+  if(!lastClearedFiles)return;
+  if(clearUndoTimer)clearTimeout(clearUndoTimer);
+  files=lastClearedFiles;
+  lastClearedFiles=null;
+  const toast=document.getElementById('undo-toast');
+  if(toast)toast.style.display='none';
+  refreshUI();
 }
 
 function removeFile(i){
+  if(i<0||i>=files.length)return;
+  const removingPreviewed=previewState.idx===i;
   if(files[i].url)URL.revokeObjectURL(files[i].url);
   files.splice(i,1);
   if(files.length)files[0].isEda=false;
+  if(removingPreviewed)closePreview();
+  else if(previewState.idx!==null&&previewState.idx>i)previewState.idx--;
   refreshUI();
 }
 
 function toggleEda(i){
   files[i].isEda=!files[i].isEda;
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function applyVerticalAll(){
   const val=c('stamp-vertical');
   files.forEach(f=>f.isVertical=val);
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function toggleEdaGroupStart(i){
   files[i].isEdaGroupStart=!files[i].isEdaGroupStart;
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function toggleVertical(i){
   files[i].isVertical=!files[i].isVertical;
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function toggleSeihon(i,checked){
   files[i].seihon=checked?'正本':'';
@@ -729,7 +911,7 @@ function toggleSeihon(i,checked){
     files[i].isEdaGroupStart=false;
     files[i].edaStart=1;
   }
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function setSeihon(i,val){
   files[i].seihon=val;
@@ -738,28 +920,34 @@ function setSeihon(i,val){
     files[i].isEdaGroupStart=false;
     files[i].edaStart=1;
   }
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 function setEdaStart(i,val){
   files[i].edaStart=Math.max(1,Math.min(999,parseInt(val)||1));
-  resetDone();refreshList();
+  markNeedsRestamp();
 }
 
 function resetDone(){
   files.forEach(f=>{
-    if(f.status==='done'){
+    if(f.status==='done'||f.status==='stale'){
       if(f.url)URL.revokeObjectURL(f.url);
       f.url=null;f.blob=null;
-      f.status=f.isImg?'img':'pending';
+      f.status='stale';
     }
   });
 }
 
 function refreshUI(){
-  if(!files.length){clearAll();return;}
+  if(!files.length){
+    ['flc','aw','pw','pdf-preview'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    setDropzoneCompact();
+    updateActionInfo();
+    return;
+  }
   document.getElementById('flc').style.display='block';
   document.getElementById('aw').style.display='flex';
   document.getElementById('flabel').textContent=`${files.length} ファイル`;
+  setDropzoneCompact();
   refreshList();
 }
 
@@ -770,27 +958,35 @@ function refreshList(){
   const raw=calcStamps();
   files.forEach((item,i)=>{
     const stamp=stamps[i],nn=outName(item,names[i]);
+    const stampLabel=escHtml(item.seihon||stamp);
+    const origLabel=escHtml(item.file.name)+(item.isImg?' → .pdf':'');
+    const newNameLabel=escHtml(nn);
+    const downloadName=escAttr(nn);
     let right='';
     if(item.status==='pending')right=`<span class="sw">待機中</span>`;
     else if(item.status==='img')right=`<span class="si">画像→PDF</span>`;
     else if(item.status==='processing')right=`<span class="sp">処理中...</span>`;
-    else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${nn}">DL</a>`;
+    else if(item.status==='done')right=`<span class="sd">完了</span><a href="${item.url}" download="${downloadName}">DL</a>`;
+    else if(item.status==='stale')right=`<span class="needs">要再付与</span>`;
     else right=`<span class="se">エラー</span>`;
     const prevForEda=files[i-1];
     const isFirstEda=item.isEda&&!item.seihon&&(i===0||!prevForEda||!prevForEda.isEda||prevForEda.seihon||item.isEdaGroupStart); // 枝グループの先頭
     const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
     const el=document.createElement('div');
-    el.className='file-row';el.draggable=true;el.dataset.idx=i;
+    el.className='file-row'+(item.isEda&&!item.seihon?' eda-member':'');el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
       <span class="dh">☰</span>
-      <span class="sbadge${item.seihon?'':(item.isEda?' ep':'')}" style="${item.seihon?'background:#7a3820':''}">${item.seihon||stamp}</span>
+      <span class="sbadge${item.seihon?'':(item.isEda?' ep':'')}" style="${item.seihon?'background:#7a3820':''}">${stampLabel}</span>
       <div class="fi-wrap">
-        <div class="fi-orig">${item.file.name}${item.isImg?' → .pdf':''}</div>
-        <div class="fi-new">→ ${nn}</div>
+        <div class="fi-orig">${origLabel}</div>
+        <div class="fi-new">→ ${newNameLabel}</div>
       </div>
       ${edaStartInput}
-      <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})">枝</button>
-      <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
+      <div class="file-tools">
+        <button class="preview-btn${previewState.idx===i?' active':''}" onclick="showPreview(${i})" title="現在の設定でスタンプ付与後のPDFをプレビュー">プレビュー</button>
+        <button class="eb${item.isEda?' active':''}" onclick="toggleEda(${i})">枝</button>
+        <button class="eb${item.isVertical?' active':''}" onclick="toggleVertical(${i})" title="このファイルのみ縦書き">縦</button>
+      </div>
       <label style="display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer">
         <input type="checkbox" ${item.seihon?'checked':''} onchange="toggleSeihon(${i},this.checked)" style="width:13px;height:13px;cursor:pointer;accent-color:var(--btn-bg);flex-shrink:0" title="正副本スタンプ">
         <select onchange="setSeihon(${i},this.value)" ${item.seihon?'':'disabled'} style="font-size:11px;padding:2px 4px;border:.5px solid var(--border);border-radius:4px;background:var(--bg3);color:${item.seihon?'var(--text)':'var(--text5)'};font-family:inherit;cursor:${item.seihon?'pointer':'default'};flex-shrink:0;opacity:${item.seihon?'1':'0.4'}">
@@ -824,7 +1020,7 @@ function refreshList(){
       const insertAt=insertBefore?dst:dst+1;
       files.splice(insertAt,0,moved);
       if(files.length)files[0].isEda=false;
-      resetDone();dragSrcIdx=null;refreshUI();
+      markNeedsRestamp();dragSrcIdx=null;refreshUI();
     });
     list.appendChild(el);
 
@@ -845,7 +1041,106 @@ function refreshList(){
     }
   });
   document.getElementById('zbtn').disabled=!files.length||!files.every(f=>f.status==='done');
+  updateActionInfo();
+  updateOutputPreview();
 }
+
+async function processOneForPreview(i){
+  if(i<0||i>=files.length)return false;
+  const item=files[i];
+  if(item.status==='done'&&item.blob&&item.url)return true;
+
+  item.status='processing';
+  refreshList();
+  await new Promise(r=>setTimeout(r,0));
+
+  try{
+    const stamps=getStamps();
+    const blob=await stampPdf(item,stamps[i]);
+    if(item.url)URL.revokeObjectURL(item.url);
+    item.blob=blob;
+    item.url=URL.createObjectURL(blob);
+    item.status='done';
+    return true;
+  }catch(e){
+    console.error(e);
+    item.status='error';
+    return false;
+  }finally{
+    refreshList();
+  }
+}
+
+async function previewSourceFile(item){
+  if(item.status==='done'&&item.blob)return item.blob;
+  if(item.isImg)return await imageToPdf(item.file);
+  return item.file;
+}
+function releasePreviewTempUrl(){
+  if(previewState.tempUrl&&previewState.url){
+    try{URL.revokeObjectURL(previewState.url);}catch(e){}
+  }
+  previewState.url=null;
+  previewState.tempUrl=null;
+}
+async function showPreview(i){
+  if(i<0||i>=files.length)return;
+  previewState.idx=i;
+  await renderPreview();
+}
+async function refreshPreviewIfNeeded(){
+  if(previewState.idx===null)return;
+  if(previewState.idx>=files.length){closePreview();return;}
+  await renderPreview();
+}
+async function renderPreview(){
+  const panel=document.getElementById('pdf-preview');
+  const empty=document.getElementById('preview-empty');
+  const frame=document.getElementById('preview-frame');
+  const title=document.getElementById('preview-title');
+  const idx=previewState.idx;
+  const item=files[idx];
+  if(!item)return;
+
+  previewState.loading=true;
+  if(panel)panel.style.display='block';
+  if(empty){empty.style.display='block';empty.textContent='現在の設定でスタンプを付与してプレビューを作成中...';}
+  if(frame){frame.style.display='none';frame.removeAttribute('src');}
+
+  try{
+    releasePreviewTempUrl();
+
+    const ok=await processOneForPreview(idx);
+    if(!ok||item.status!=='done'||!item.url){
+      throw new Error('preview processing failed');
+    }
+
+    previewState.url=item.url;
+    previewState.tempUrl=false;
+
+    if(title)title.textContent=`PDFプレビュー（処理後）: ${item.file.name}`;
+    if(empty)empty.style.display='none';
+    if(frame){
+      frame.src=item.url+'#toolbar=1&navpanes=0&view=FitH';
+      frame.style.display='block';
+    }
+  }catch(e){
+    console.error(e);
+    if(empty){empty.style.display='block';empty.textContent='プレビューを作成できませんでした。PDFの読み込みまたはスタンプ付与に失敗した可能性があります。';}
+    if(frame){frame.style.display='none';frame.removeAttribute('src');}
+    releasePreviewTempUrl();
+  }finally{previewState.loading=false;}
+}
+function closePreview(){
+  releasePreviewTempUrl();
+  previewState={idx:null,url:null,tempUrl:null,loading:false};
+  const frame=document.getElementById('preview-frame');
+  if(frame){frame.style.display='none';frame.removeAttribute('src');}
+  const panel=document.getElementById('pdf-preview');
+  if(panel)panel.style.display='none';
+  refreshList();
+}
+
 
 /* ── ドロップゾーン ── */
 const dz=document.getElementById('dropzone');
@@ -871,8 +1166,8 @@ async function imageToPdf(file){
 }
 
 function makeStampPng(text,vertical){
-  const fs=parseInt(v('stamp-size'))||14;
-  const color=v('stamp-color')||'#BF3528';
+  const fs=parseInt(v('stamp-size'))||20;
+  const color=v('stamp-color')||'#000000';
   const bg=c('stamp-bg');
   // vertical is passed as argument
   const pad=bg?5:0,DPR=4;
@@ -954,6 +1249,41 @@ async function addPageNumbers(doc){
   });
 }
 
+const A4W=595.28,A4H=841.89;
+function targetA4ForPage(page){
+  const vps=visualPageSize(page);
+  const landscape=vps.width>vps.height;
+  return{width:landscape?A4H:A4W,height:landscape?A4W:A4H,visual:vps};
+}
+function setPageBoxes(page,w,h){
+  page.setSize(w,h);
+  try{page.setMediaBox(0,0,w,h);}catch(e){}
+  try{page.setCropBox(0,0,w,h);}catch(e){}
+  try{page.setBleedBox(0,0,w,h);}catch(e){}
+  try{page.setTrimBox(0,0,w,h);}catch(e){}
+  try{page.setArtBox(0,0,w,h);}catch(e){}
+}
+async function forceA4Pages(doc){
+  const pages=doc.getPages();
+  for(const page of pages){
+    const angle=normAngle(page);
+    const box=visibleBox(page);
+    const target=targetA4ForPage(page);
+    const targetVisualW=target.width,targetVisualH=target.height;
+    const targetInternalW=(angle===90||angle===270)?targetVisualH:targetVisualW;
+    const targetInternalH=(angle===90||angle===270)?targetVisualW:targetVisualH;
+    const scale=Math.min(targetVisualW/target.visual.width,targetVisualH/target.visual.height);
+    const drawnW=box.width*scale,drawnH=box.height*scale;
+    const offsetX=(targetInternalW-drawnW)/2;
+    const offsetY=(targetInternalH-drawnH)/2;
+    try{page.translateContent(-box.x,-box.y);}catch(e){}
+    try{page.scaleContent(scale,scale);}catch(e){}
+    try{page.scaleAnnotations(scale,scale);}catch(e){}
+    try{page.translateContent(offsetX,offsetY);}catch(e){}
+    setPageBoxes(page,targetInternalW,targetInternalH);
+  }
+}
+
 function normAngle(page){
   const raw=page.getRotation?.().angle||0;
   return ((raw%360)+360)%360;
@@ -1029,6 +1359,7 @@ function drawImageTopLeft(page,img,w,h,mL,mT){
 async function stampPdf(item,text){
   const pdfFile=item.isImg?await imageToPdf(item.file):item.file;
   const doc=await PDFLib.PDFDocument.load(await pdfFile.arrayBuffer());
+  if(c('force-a4'))await forceA4Pages(doc);
   if(c('del-meta')){
     doc.setTitle('');doc.setAuthor('');doc.setSubject('');
     doc.setKeywords([]);doc.setCreator('');doc.setProducer('');
@@ -1037,8 +1368,8 @@ async function stampPdf(item,text){
   const{bytes,w,h}=makeStampPng(text,item.isVertical);
   const png=await doc.embedPng(bytes);
   const page=doc.getPages()[0];
-  const mR=parseInt(v('margin-r'))||14;
-  const mT=parseInt(v('margin-t'))||14;
+  const mR=parseInt(v('margin-r'))||30;
+  const mT=parseInt(v('margin-t'))||50;
   if(item.seihon){
     // 正副本モード：正副本スタンプのみ（見た目上の左上）。PDF内部の/Rotateは変更しない。
     const{bytes:sb,w:sw,h:sh}=makeStampPng(item.seihon,false);
@@ -1077,6 +1408,7 @@ async function processAll(){
   document.getElementById('pt').textContent=`完了 — ${done} ファイル処理しました`;
   btn.disabled=false;btn.textContent='スタンプを付与する';
   stampComplete();
+  refreshPreviewIfNeeded();
 }
 
 /* ── ZIP出力 ── */
@@ -1177,7 +1509,12 @@ window.addEventListener('DOMContentLoaded',()=>{
   normalizeStampStyle();
   updateStyleOptionLabels();
   updateCustomSymControls();
+  updateNoStampNumberControls();
+  updateOutputPreview();
+  updateActionInfo();
+  setDropzoneCompact();
 });
 </script>
+<div id="undo-toast" class="undo-toast">すべて削除しました <button onclick="undoClearAll()">元に戻す</button></div>
 </body>
 </html>
