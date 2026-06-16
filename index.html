@@ -81,6 +81,9 @@ input[type=color]{width:34px;height:30px;border:.5px solid var(--border);border-
 .eb{background:none;border:.5px solid var(--border);border-radius:4px;cursor:pointer;font-size:10px;font-weight:500;font-family:inherit;color:var(--text2);padding:2px 5px;transition:all .12s;flex-shrink:0}
 .eb.active{background:#7a2018;border-color:#7a2018;color:#fff}
 .eb:disabled{opacity:.2;cursor:not-allowed}
+.manual-num{display:flex;align-items:center;gap:3px;flex-shrink:0;color:var(--text3);font-size:10px}
+.manual-num input{width:42px;text-align:center;background:var(--bg3);border:.5px solid var(--border);border-radius:5px;padding:2px 4px;font-size:11px;font-family:inherit;color:var(--text);outline:none}
+.manual-num input:disabled{opacity:.35;cursor:not-allowed}
 .fr{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .fr button.rm{background:none;border:none;cursor:pointer;font-size:14px;color:var(--text5);padding:0;line-height:1;font-family:inherit}
 .fr a{font-size:12px;font-weight:500;color:#1d6eb5;text-decoration:none}
@@ -327,7 +330,7 @@ html.dark .needs{color:#F4B84A}
     </div>
     <div class="flc-top">
       <span id="flabel" class="fc"></span>
-      <span class="fh">「枝」で枝番 · ドラッグで並び替え</span>
+      <span class="fh">番号欄は空欄で自動採番 · 「枝」で枝番 · ドラッグで並び替え</span>
       <button class="fa" onclick="clearAll()">すべて削除</button>
     </div>
     <div id="fl"></div>
@@ -389,6 +392,7 @@ html.dark .needs{color:#F4B84A}
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">区切り文字</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル名の証拠番号または符号と書類名の間の区切り。選択中のファイル名形式・符号に応じて表示例が切り替わります。番号なしの場合は「資料_書類名.pdf」のように元のファイル名を維持したまま、符号のみを先頭に付けます。mintsルールでは半角スペースが標準。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイル名変更</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックを外すとファイル名はそのままでスタンプのみ付与します。オフにするとファイル名の形式・区切り文字・元のファイル名を削除の設定がすべて無効になります。</td></tr>
           <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">元のファイル名を削除</td><td style="padding:5px 0;color:var(--text);line-height:1.6">チェックをオンにすると「甲001.pdf」のように番号だけのファイル名になります。オンのときは区切り文字の設定が無効になります。</td></tr>
+          <tr style="border-top:.5px solid var(--border3)"><td style="padding:5px 10px 5px 0;color:var(--text4);white-space:nowrap;vertical-align:top;font-weight:500">ファイルごとの番号</td><td style="padding:5px 0;color:var(--text);line-height:1.6">ファイル行の「番号」欄に数字を入力すると、その行だけ任意の号証番号になります。空欄の場合は開始番号から従来どおり自動採番されます。枝番行では「甲5の1」の「5」に当たる幹番号を指定し、枝番号は従来どおり「の」入力欄または連続枝番で管理します。</td></tr>
         </table>
       </section>
 
@@ -747,6 +751,11 @@ function adj(d){
 }
 
 /* ── 付番ロジック ── */
+function getManualMain(item){
+  const n=parseInt(item.manualNum,10);
+  return Number.isFinite(n)&&n>=1&&n<=999?n:null;
+}
+
 function calcStamps(){
   const start=parseInt(v('start-num')||'1');
   let main=start-1;
@@ -754,6 +763,7 @@ function calcStamps(){
   for(let i=0;i<files.length;i++){
     const item=files[i];
     const prev=files[i-1];
+    const manual=getManualMain(item);
     // 正副本ファイルは、証拠番号の連番だけでなく「枝番の連続判定」からも完全に除外する。
     // これを入れないと、正副本行にisEda状態が残っていた場合、その直後の枝番が直前の号証へ誤ってぶら下がる。
     const prevIsEvidenceEda=i>0&&prev&&prev.isEda&&!prev.seihon;
@@ -762,19 +772,21 @@ function calcStamps(){
       // 正副本ファイル：証拠番号カウントをスキップし、枝番グループもここで途切れさせる
       out.push({main,eda:0,skip:true});
     }else if(!item.isEda){
-      // 通常ファイル：番号を進める
-      main++;
-      out.push({main,eda:0});
+      // 通常ファイル：手動番号があればその番号、なければ従来どおり番号を進める
+      main=manual!==null?manual:main+1;
+      out.push({main,eda:0,manual:manual!==null});
     }else if(!prevIsEvidenceEda||item.isEdaGroupStart){
-      // 枝グループの最初 or 区切りフラグ：新しい幹番号を取得・edaStartから開始
-      main++;
+      // 枝グループの最初 or 区切りフラグ：手動番号があればその幹番号、なければ新しい幹番号を取得
+      main=manual!==null?manual:main+1;
       const es=parseInt(item.edaStart)||1;
-      out.push({main,eda:es});
+      out.push({main,eda:es,manual:manual!==null});
     }else{
-      // 枝グループの続き：同じmain番号・edaをインクリメント
+      // 枝グループの続き：通常は同じmain番号。手動番号が入力されている場合だけ、その行の幹番号として優先する。
       const prevOut=out[out.length-1];
+      const rowMain=manual!==null?manual:(prevOut?prevOut.main:main);
+      if(manual!==null)main=manual;
       const nextEda=prevOut&&prevOut.eda>0?prevOut.eda+1:1;
-      out.push({main,eda:nextEda});
+      out.push({main:rowMain,eda:nextEda,manual:manual!==null});
     }
   }
   return out;
@@ -820,9 +832,9 @@ function outName(item,stamp){
 async function handleFiles(fl){
   for(const f of fl){
     if(f.type==='application/pdf')
-      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
+      files.push({file:f,status:'pending',blob:null,url:null,isEda:false,isImg:false,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false,manualNum:''});
     else if(/image\/(jpeg|png)/.test(f.type))
-      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false});
+      files.push({file:f,status:'img',blob:null,url:null,isEda:false,isImg:true,edaStart:1,isVertical:false,seihon:'',isEdaGroupStart:false,manualNum:''});
   }
   document.getElementById('fi').value='';
   refreshUI();
@@ -926,6 +938,16 @@ function setEdaStart(i,val){
   files[i].edaStart=Math.max(1,Math.min(999,parseInt(val)||1));
   markNeedsRestamp();
 }
+function setManualNum(i,val){
+  const raw=String(val||'').trim();
+  if(raw===''){
+    files[i].manualNum='';
+  }else{
+    const n=Math.max(1,Math.min(999,parseInt(raw,10)||1));
+    files[i].manualNum=String(n);
+  }
+  markNeedsRestamp();
+}
 
 function resetDone(){
   files.forEach(f=>{
@@ -972,6 +994,7 @@ function refreshList(){
     const prevForEda=files[i-1];
     const isFirstEda=item.isEda&&!item.seihon&&(i===0||!prevForEda||!prevForEda.isEda||prevForEda.seihon||item.isEdaGroupStart); // 枝グループの先頭
     const edaStartInput=isFirstEda?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:11px;color:#999">の</span><input type="number" value="${item.edaStart||1}" min="1" max="999" onchange="setEdaStart(${i},this.value)" style="width:36px;font-size:11px;text-align:center;background:#F8F7F4;border:.5px solid #CCC;border-radius:4px;padding:2px 3px;font-family:inherit;color:#1a1a1a" title="枝番開始番号"></div>`:'';
+    const manualNumInput=`<label class="manual-num" title="この行だけ号証番号を指定します。空欄なら開始番号から自動採番します。枝番行では幹番号を指定します。"><span>番号</span><input type="number" value="${escAttr(item.manualNum||'')}" min="1" max="999" placeholder="自動" onchange="setManualNum(${i},this.value)" ${item.seihon?'disabled':''}></label>`;
     const el=document.createElement('div');
     el.className='file-row'+(item.isEda&&!item.seihon?' eda-member':'');el.draggable=true;el.dataset.idx=i;
     el.innerHTML=`
@@ -981,6 +1004,7 @@ function refreshList(){
         <div class="fi-orig">${origLabel}</div>
         <div class="fi-new">→ ${newNameLabel}</div>
       </div>
+      ${manualNumInput}
       ${edaStartInput}
       <div class="file-tools">
         <button class="preview-btn${previewState.idx===i?' active':''}" onclick="showPreview(${i})" title="現在の設定でスタンプ付与後のPDFをプレビュー">プレビュー</button>
